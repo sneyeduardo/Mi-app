@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Préstamo Directo - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-arrow-right"></i> Realizar Préstamo Directo
+                    <small class="text-muted">(Solo Administradores)</small>
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-iunp-warning">
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>Préstamo Directo:</strong> Esta función permite crear préstamos inmediatos sin necesidad de solicitudes previas.
+                </div>
+                
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.equipo_id.label(class="form-label") }}
+                            {{ form.equipo_id(class="form-select") }}
+                            {% if form.equipo_id.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.equipo_id.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Solo se muestran equipos disponibles
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.usuario_id.label(class="form-label") }}
+                            {{ form.usuario_id(class="form-select") }}
+                            {% if form.usuario_id.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.usuario_id.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Selecciona el usuario que recibirá el equipo
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form.observaciones.label(class="form-label") }}
+                        {{ form.observaciones(class="form-control", rows="3", placeholder="Opcional: Motivo del préstamo, condiciones especiales, etc.") }}
+                        {% if form.observaciones.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.observaciones.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="alert alert-iunp-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Qué sucederá:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Se creará un préstamo activo inmediatamente</li>
+                            <li>El equipo cambiará a estado "Prestado"</li>
+                            <li>Se registrará la fecha y hora actual</li>
+                            <li>El usuario podrá ver el préstamo en su panel</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex gap-3">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-iunp-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        {{ form.submit(class="btn btn-iunp-warning flex-fill") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualizar opciones dinámicamente
+    const equipoSelect = document.querySelector('select[name="equipo_id"]');
+    const usuarioSelect = document.querySelector('select[name="usuario_id"]');
+    
+    // Confirmar creación de préstamo
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const equipoTexto = equipoSelect.options[equipoSelect.selectedIndex].text;
+        const usuarioTexto = usuarioSelect.options[usuarioSelect.selectedIndex].text;
+        
+        if (!equipoSelect.value || !usuarioSelect.value) {
+            e.preventDefault();
+            alert('Por favor selecciona tanto el equipo como el usuario.');
+            return;
+        }
+        
+        const mensaje = `¿Estás seguro de crear un préstamo?\n\nEquipo: ${equipoTexto}\nUsuario: ${usuarioTexto}`;
+        
+        if (!confirm(mensaje)) {
+            e.preventDefault();
+        }
+    });
+    
+    // Mostrar información adicional del equipo seleccionado
+    equipoSelect.addEventListener('change', function() {
+        if (this.value) {
+            // Aquí se podría agregar lógica para mostrar más detalles del equipo
+            console.log('Equipo seleccionado:', this.value);
+        }
+    });
+    
+    // Contador de caracteres para observaciones
+    const observacionesTextarea = document.querySelector('textarea[name="observaciones"]');
+    if (observacionesTextarea) {
+        const maxLength = 500;
+        const counter = document.createElement('small');
+        counter.className = 'text-muted float-end';
+        observacionesTextarea.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const remaining = maxLength - observacionesTextarea.value.length;
+            counter.textContent = `${observacionesTextarea.value.length}/${maxLength} caracteres`;
+            counter.className = remaining < 50 ? 'text-warning float-end' : 'text-muted float-end';
+        }
+        
+        observacionesTextarea.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+});
+</script>
+{% endblock %}

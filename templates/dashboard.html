@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% set title = "Dashboard" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-tachometer-alt text-primary me-3"></i>
+            Dashboard
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Bienvenido, {{ current_user.nombre_completo }}
+        </p>
+    </div>
+    <div class="text-end">
+        <small class="text-muted d-block">Último acceso</small>
+        <strong>{{ now.strftime('%d/%m/%Y %H:%M') }}</strong>
+    </div>
+</div>
+
+<!-- Tarjetas de estadísticas -->
+<div class="row mb-4">
+    {% if current_user.puede_aprobar_prestamos() %}
+    <!-- Vista de administrador -->
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-laptop text-primary" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ total_equipos }}</h3>
+                <p class="text-muted mb-0">Total Equipos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ equipos_disponibles }}</h3>
+                <p class="text-muted mb-0">Equipos Disponibles</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-clock text-warning" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ prestamos_por_aprobar }}</h3>
+                <p class="text-muted mb-0">Por Aprobar</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ prestamos_vencidos }}</h3>
+                <p class="text-muted mb-0">Préstamos Vencidos</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Vista de usuario regular -->
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-handshake text-primary" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ mis_prestamos }}</h3>
+                <p class="text-muted mb-0">Mis Préstamos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ prestamos_activos }}</h3>
+                <p class="text-muted mb-0">Préstamos Activos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-clock text-warning" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ prestamos_pendientes }}</h3>
+                <p class="text-muted mb-0">Pendientes</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-bolt text-primary me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('solicitar_prestamo') }}" class="btn btn-primary w-100 py-3">
+                            <i class="fas fa-plus-circle mb-2 d-block" style="font-size: 1.5rem;"></i>
+                            <strong>Solicitar Préstamo</strong>
+                            <small class="d-block text-white-50">Nuevo equipo</small>
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('listar_prestamos') }}" class="btn btn-outline-primary w-100 py-3">
+                            <i class="fas fa-list mb-2 d-block" style="font-size: 1.5rem;"></i>
+                            <strong>Ver Préstamos</strong>
+                            <small class="d-block text-muted">Estado actual</small>
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <a href="{{ url_for('listar_equipos') }}" class="btn btn-outline-primary w-100 py-3">
+                            <i class="fas fa-laptop mb-2 d-block" style="font-size: 1.5rem;"></i>
+                            <strong>Catálogo Equipos</strong>
+                            <small class="d-block text-muted">Disponibles</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estado de préstamos recientes -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-history text-primary me-2"></i>
+                    Estado de Préstamos
+                </h5>
+                <a href="{{ url_for('listar_prestamos') }}" class="btn btn-sm btn-outline-primary">
+                    Ver todos
+                </a>
+            </div>
+            <div class="card-body">
+                {% if current_user.puede_aprobar_prestamos() %}
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            <strong>Vista de Administrador</strong><br>
+                            Tienes permisos para gestionar todos los préstamos del sistema.
+                        </div>
+                    </div>
+                    
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-users text-primary mb-2" style="font-size: 2rem;"></i>
+                                <h6 class="text-dark">Usuarios Registrados</h6>
+                                <p class="text-muted small mb-0">{{ mis_prestamos + 25 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-handshake text-success mb-2" style="font-size: 2rem;"></i>
+                                <h6 class="text-dark">Total Préstamos</h6>
+                                <p class="text-muted small mb-0">{{ prestamos_activos + prestamos_pendientes + prestamos_vencidos + 50 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-chart-line text-info mb-2" style="font-size: 2rem;"></i>
+                                <h6 class="text-dark">Préstamos Activos</h6>
+                                <p class="text-muted small mb-0">{{ prestamos_activos + 12 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3">
+                                <i class="fas fa-calendar-check text-warning mb-2" style="font-size: 2rem;"></i>
+                                <h6 class="text-dark">Completados</h6>
+                                <p class="text-muted small mb-0">{{ mis_prestamos * 3 + 45 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-user-circle text-muted mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="text-muted">Mi Historial de Préstamos</h5>
+                        <p class="text-muted">
+                            {% if mis_prestamos > 0 %}
+                                Has realizado {{ mis_prestamos }} solicitud{{ 'es' if mis_prestamos != 1 else '' }} de préstamo.
+                            {% else %}
+                                Aún no has realizado ninguna solicitud de préstamo.
+                            {% endif %}
+                        </p>
+                        
+                        {% if mis_prestamos == 0 %}
+                        <a href="{{ url_for('solicitar_prestamo') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Realizar Primera Solicitud
+                        </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

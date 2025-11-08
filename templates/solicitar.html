@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Préstamo - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('listar_equipos') }}" class="btn btn-iunp-outline-secondary me-3">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-plus-circle text-iunp-primary me-2"></i>Solicitar Préstamo de Equipo
+                </h1>
+                <p class="text-muted mb-0">Completa la información para solicitar el equipo en préstamo</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Selección de Equipo -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-laptop text-primary me-2"></i>Seleccionar Equipo
+                            </h5>
+                            {{ form.equipo_id.label(class="form-label") }}
+                            {{ form.equipo_id(class="form-select" + (" is-invalid" if form.equipo_id.errors else ""), required=true) }}
+                            {% if form.equipo_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.equipo_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <small><i class="fas fa-info-circle me-1"></i>Selecciona el equipo que deseas solicitar</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fechas y Horarios -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>Fechas y Horarios del Préstamo
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_inicio" class="form-label">
+                                        <i class="fas fa-play-circle me-1"></i>{{ form.fecha_inicio.label.text }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calendar"></i>
+                                        </span>
+                                        <input type="datetime-local" 
+                                               id="fecha_inicio" 
+                                               name="fecha_inicio" 
+                                               class="form-control" 
+                                               required>
+                                    </div>
+                                    <div class="form-text">
+                                        <small><i class="fas fa-info-circle me-1"></i>Cuándo necesitas el equipo</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="fecha_fin_programada" class="form-label">
+                                        <i class="fas fa-stop-circle me-1"></i>{{ form.fecha_fin_programada.label.text }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calendar-times"></i>
+                                        </span>
+                                        <input type="datetime-local" 
+                                               id="fecha_fin_programada" 
+                                               name="fecha_fin_programada" 
+                                               class="form-control" 
+                                               required>
+                                    </div>
+                                    <div class="form-text">
+                                        <small><i class="fas fa-info-circle me-1"></i>Cuándo devolverás el equipo</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Información de duración -->
+                            <div id="duracion-info" class="alert alert-info d-none">
+                                <i class="fas fa-clock me-2"></i>
+                                <strong>Duración del préstamo:</strong> 
+                                <span id="duracion-texto"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motivo del Préstamo -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-comment-dots text-primary me-2"></i>Motivo del Préstamo
+                            </h5>
+                            {{ form.motivo.label(class="form-label") }}
+                            {{ form.motivo(class="form-control" + (" is-invalid" if form.motivo.errors else ""), 
+                                         rows="4", 
+                                         placeholder="Ej: Necesito el proyector para una presentación de clase el viernes a las 2:00 PM. La presentación es sobre el tema X para la clase de Y.", 
+                                         required=true) }}
+                            {% if form.motivo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.motivo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <small><i class="fas fa-info-circle me-1"></i>Sé específico sobre el uso del equipo y por qué lo necesitas</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones Adicionales -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">
+                                <i class="fas fa-sticky-note text-primary me-2"></i>Observaciones Adicionales
+                            </h5>
+                            {{ form.observaciones_usuario.label(class="form-label") }}
+                            {{ form.observaciones_usuario(class="form-control", 
+                                                        rows="3", 
+                                                        placeholder="Opcional: Información adicional, requerimientos especiales, etc.") }}
+                            <div class="form-text">
+                                <small><i class="fas fa-info-circle me-1"></i>Cualquier información adicional que consideres importante</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información del proceso -->
+                    <div class="alert alert-iunp-info border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle fa-2x me-3 text-primary"></i>
+                            <div>
+                                <h6 class="mb-2">¿Qué sucede después?</h6>
+                                <ul class="mb-0 small">
+                                    <li>Tu solicitud será enviada al administrador para revisión</li>
+                                    <li>Recibirás una notificación cuando sea aprobada o rechazada</li>
+                                    <li>Si es aprobada, el equipo estará disponible en la fecha solicitada</li>
+                                    <li>Debes devolver el equipo en la fecha indicada</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="border-top pt-4">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('listar_equipos') }}" class="btn btn-iunp-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary" onclick="guardarBorrador()">
+                                    <i class="fas fa-save me-2"></i>Guardar Borrador
+                                </button>
+                                <button type="submit" class="btn btn-iunp-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Enviar Solicitud
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Consejos y ayuda -->
+        <div class="card border-0 bg-light mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-lightbulb text-iunp-warning me-2"></i>Consejos para una solicitud exitosa
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="mb-0 small text-muted">
+                            <li>Solicita con al menos 2-3 días de anticipación</li>
+                            <li>Sé específico sobre las fechas y horarios</li>
+                            <li>Explica claramente el motivo del préstamo</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-0 small text-muted">
+                            <li>Verifica que el equipo esté disponible</li>
+                            <li>Considera que el préstamo máximo es de 30 días</li>
+                            <li>Respeta las fechas de devolución</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fechaInicio = document.getElementById('fecha_inicio');
+    const fechaFin = document.getElementById('fecha_fin_programada');
+    const duracionInfo = document.getElementById('duracion-info');
+    const duracionTexto = document.getElementById('duracion-texto');
+
+    // Configurar fecha mínima (ahora + 1 hora)
+    const ahora = new Date();
+    const minima = new Date(ahora.getTime() + (60 * 60 * 1000)); // +1 hora
+    
+    fechaInicio.min = minima.toISOString().slice(0, 16);
+    fechaFin.min = minima.toISOString().slice(0, 16);
+
+    // Establecer valores por defecto
+    fechaInicio.value = minima.toISOString().slice(0, 16);
+    
+    // Si hay valores previos del formulario (ej. validación fallida), usarlos
+    const fechaInicioPrevio = '{{ form.fecha_inicio.data.strftime("%Y-%m-%dT%H:%M") if form.fecha_inicio.data else "" }}';
+    const fechaFinPrevio = '{{ form.fecha_fin_programada.data.strftime("%Y-%m-%dT%H:%M") if form.fecha_fin_programada.data else "" }}';
+    
+    if (fechaInicioPrevio && fechaInicioPrevio !== 'None') {
+        fechaInicio.value = fechaInicioPrevio;
+        fechaFin.min = fechaInicioPrevio;
+    }
+    
+    if (fechaFinPrevio && fechaFinPrevio !== 'None') {
+        fechaFin.value = fechaFinPrevio;
+    }
+    
+    // Función para calcular y mostrar duración
+    function calcularDuracion() {
+        const inicio = new Date(fechaInicio.value);
+        const fin = new Date(fechaFin.value);
+        
+        if (fechaInicio.value && fechaFin.value && fin > inicio) {
+            const diferencia = fin - inicio;
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+            
+            let textoDuracion = '';
+            if (dias > 0) {
+                textoDuracion += `${dias} día${dias !== 1 ? 's' : ''}`;
+                if (horas > 0 || minutos > 0) {
+                    textoDuracion += `, ${horas} hora${horas !== 1 ? 's' : ''}`;
+                }
+            } else if (horas > 0) {
+                textoDuracion = `${horas} hora${horas !== 1 ? 's' : ''}`;
+                if (minutos > 0) {
+                    textoDuracion += ` y ${minutos} minuto${minutos !== 1 ? 's' : ''}`;
+                }
+            } else {
+                textoDuracion = `${minutos} minuto${minutos !== 1 ? 's' : ''}`;
+            }
+            
+            duracionTexto.textContent = textoDuracion;
+            duracionInfo.classList.remove('d-none');
+        } else {
+            duracionInfo.classList.add('d-none');
+        }
+    }
+
+    // Función para validar fechas
+    function validarFechas() {
+        let valido = true;
+        
+        // Limpiar errores previos
+        fechaInicio.classList.remove('is-invalid');
+        fechaFin.classList.remove('is-invalid');
+        
+        // Validar fecha de inicio
+        if (!fechaInicio.value) {
+            fechaInicio.classList.add('is-invalid');
+            valido = false;
+        } else {
+            const inicio = new Date(fechaInicio.value);
+            if (inicio <= ahora) {
+                fechaInicio.classList.add('is-invalid');
+                valido = false;
+            }
+        }
+        
+        // Validar fecha de fin
+        if (!fechaFin.value) {
+            fechaFin.classList.add('is-invalid');
+            valido = false;
+        } else {
+            const fin = new Date(fechaFin.value);
+            if (fin <= new Date(fechaInicio.value)) {
+                fechaFin.classList.add('is-invalid');
+                valido = false;
+            }
+            
+            // Validar que no sea mayor a 30 días
+            const inicio = new Date(fechaInicio.value);
+            const diferencia = fin - inicio;
+            const dias = diferencia / (1000 * 60 * 60 * 24);
+            
+            if (dias > 30) {
+                fechaFin.classList.add('is-invalid');
+                valido = false;
+            }
+        }
+        
+        return valido;
+    }
+
+    // Event listeners
+    fechaInicio.addEventListener('change', function() {
+        // Actualizar fecha mínima de fin
+        fechaFin.min = this.value;
+        
+        // Si fecha fin es menor que fecha inicio, ajustar
+        if (fechaFin.value && fechaFin.value <= this.value) {
+            const nuevaFin = new Date(new Date(this.value).getTime() + (60 * 60 * 1000)); // +1 hora
+            fechaFin.value = nuevaFin.toISOString().slice(0, 16);
+        }
+        
+        calcularDuracion();
+        validarFechas();
+    });
+    
+    fechaFin.addEventListener('change', function() {
+        calcularDuracion();
+        validarFechas();
+    });
+
+    // Calcular duración inicial
+    calcularDuracion();
+
+    // Validación del formulario
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!validarFechas()) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Error en las fechas:</strong> Verifica que las fechas sean válidas y estén en el orden correcto.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            form.insertBefore(alertDiv, form.firstChild);
+            
+            // Scroll al primer error
+            const primerError = document.querySelector('.is-invalid');
+            if (primerError) {
+                primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        form.classList.add('was-validated');
+    });
+
+    // Función para guardar borrador
+    window.guardarBorrador = function() {
+        const borrador = {
+            equipo_id: document.querySelector('select[name="equipo_id"]').value,
+            fecha_inicio: fechaInicio.value,
+            fecha_fin_programada: fechaFin.value,
+            motivo: document.querySelector('textarea[name="motivo"]').value,
+            observaciones_usuario: document.querySelector('textarea[name="observaciones_usuario"]').value
+        };
+        
+        localStorage.setItem('borrador_prestamo', JSON.stringify(borrador));
+        
+        // Mostrar notificación de guardado
+        const toast = document.createElement('div');
+        toast.className = 'position-fixed top-0 end-0 m-3 bg-success text-white p-3 rounded';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            Borrador guardado correctamente
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    };
+
+    // Cargar borrador al cargar la página
+    const borradorGuardado = localStorage.getItem('borrador_prestamo');
+    if (borradorGuardado) {
+        try {
+            const borrador = JSON.parse(borradorGuardado);
+            
+            // Confirmar si quiere cargar el borrador
+            if (confirm('Se encontró un borrador guardado. ¿Deseas cargarlo?')) {
+                if (borrador.equipo_id) {
+                    document.querySelector('select[name="equipo_id"]').value = borrador.equipo_id;
+                }
+                if (borrador.fecha_inicio) {
+                    fechaInicio.value = borrador.fecha_inicio;
+                    fechaFin.min = borrador.fecha_inicio;
+                }
+                if (borrador.fecha_fin_programada) {
+                    fechaFin.value = borrador.fecha_fin_programada;
+                }
+                if (borrador.motivo) {
+                    document.querySelector('textarea[name="motivo"]').value = borrador.motivo;
+                }
+                if (borrador.observaciones_usuario) {
+                    document.querySelector('textarea[name="observaciones_usuario"]').value = borrador.observaciones_usuario;
+                }
+                
+                calcularDuracion();
+            }
+        } catch (e) {
+            console.error('Error al cargar borrador:', e);
+        }
+    }
+
+    // Limpiar borrador al enviar exitosamente
+    form.addEventListener('submit', function() {
+        localStorage.removeItem('borrador_prestamo');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% set title = "Inicio" %}
+
+{% block content %}
+<div class="row min-vh-100 align-items-center">
+    <div class="col-lg-6">
+        <div class="text-center text-lg-start">
+            <div class="mb-4">
+                <img src="{{ url_for('static', filename='images/university_logo.jpg') }}" 
+                     alt="IUNP Logo" class="university-logo mb-4" style="width: 140px; height: 140px;">
+            </div>
+            
+            <h1 class="display-4 fw-bold text-dark mb-4">
+                Sistema General
+                <br>
+                <span class="text-primary">IUNP</span>
+            </h1>
+            
+            <p class="lead text-muted mb-4">
+                Instituto Universitario de Venezuela
+            </p>
+            
+            <p class="text-dark mb-5">
+                Plataforma moderna y eficiente para la gestión general de equipos universitarios. 
+                Facilita el acceso y control de recursos tecnológicos para estudiantes y profesores.
+            </p>
+            
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Iniciar Sesión
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Registrarse
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="row g-4">
+            <!-- Características del sistema -->
+            <div class="col-12">
+                <div class="card border-0 shadow-custom h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px; background-color: rgba(225, 0, 38, 0.1);">
+                                <i class="fas fa-laptop text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="text-dark mb-0">Gestión de Equipos</h5>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Catálogo completo de equipos disponibles con búsqueda y filtrado avanzado.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card border-0 shadow-custom h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px; background-color: rgba(225, 0, 38, 0.1);">
+                                <i class="fas fa-handshake text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="text-dark mb-0">Solicitudes Simplificadas</h5>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Proceso de solicitud rápido e intuitivo con seguimiento en tiempo real.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card border-0 shadow-custom h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px; background-color: rgba(225, 0, 38, 0.1);">
+                                <i class="fas fa-chart-line text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="text-dark mb-0">Control Administrativo</h5>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Panel de control para administración con reportes y estadísticas detalladas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12">
+                <div class="card border-0 shadow-custom h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px; background-color: rgba(225, 0, 38, 0.1);">
+                                <i class="fas fa-clock text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="text-dark mb-0">Seguimiento en Tiempo Real</h5>
+                        </div>
+                        <p class="text-muted mb-0">
+                            Monitoreo continuo del estado de recursos con notificaciones automáticas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sección de información adicional -->
+<div class="row mt-5 pt-5">
+    <div class="col-12">
+        <div class="card border-0" style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);">
+            <div class="card-body text-center text-white py-5">
+                <h3 class="mb-4">¿Listo para comenzar?</h3>
+                <p class="lead mb-4">
+                    Únete a la comunidad universitaria y accede a los mejores recursos tecnológicos.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Crear Cuenta
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Ya tengo cuenta
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

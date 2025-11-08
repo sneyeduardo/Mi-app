@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% set title = "Gestión de Tokens de Acceso" %}
+
+{% block content %}
+<!-- Header de tokens -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-tasks text-info me-3"></i>
+            Gestión de Tokens de Acceso
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Monitorea y administra todos los tokens de acceso único generados
+        </p>
+    </div>
+    <div>
+        <a href="{{ url_for('generar_token_admin') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Generar Nuevo Token
+        </a>
+    </div>
+</div>
+
+<!-- Tarjetas de resumen -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="text-primary mb-2">
+                    <i class="fas fa-key" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1" id="totalTokens">-</h4>
+                <p class="text-muted mb-0 small">Total Tokens</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="text-success mb-2">
+                    <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-success mb-1" id="tokensActivos">-</h4>
+                <p class="text-muted mb-0 small">Tokens Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="text-warning mb-2">
+                    <i class="fas fa-clock" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-warning mb-1" id="tokensPendientes">-</h4>
+                <p class="text-muted mb-0 small">Por Usar</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body py-3">
+                <div class="text-secondary mb-2">
+                    <i class="fas fa-ban" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-secondary mb-1" id="tokensUsados">-</h4>
+                <p class="text-muted mb-0 small">Ya Usados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h6 class="mb-0">
+            <i class="fas fa-filter me-2"></i>Filtros de Búsqueda
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Estado</label>
+                <select class="form-select" id="filtroEstado">
+                    <option value="">Todos los estados</option>
+                    <option value="activo">Activos</option>
+                    <option value="usado">Usados</option>
+                    <option value="vencido">Vencidos</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Usuario</label>
+                <input type="text" class="form-control" id="filtroUsuario" placeholder="Buscar por usuario...">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Fecha Desde</label>
+                <input type="date" class="form-control" id="filtroFechaDesde">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Fecha Hasta</label>
+                <input type="date" class="form-control" id="filtroFechaHasta">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button class="btn btn-primary me-2" onclick="cargarTokens()">
+                    <i class="fas fa-search me-2"></i>Filtrar
+                </button>
+                <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+                    <i class="fas fa-eraser me-2"></i>Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de tokens -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">
+            <i class="fas fa-list me-2"></i>Lista de Tokens
+        </h6>
+        <button class="btn btn-sm btn-outline-primary" onclick="cargarTokens()">
+            <i class="fas fa-sync-alt me-1"></i>Actualizar
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Token</th>
+                        <th>Usuario</th>
+                        <th>Descripción</th>
+                        <th>Fecha Creación</th>
+                        <th>Expira</th>
+                        <th>Estado</th>
+                        <th>IP Origen</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tokensTableBody">
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <div class="mt-2 text-muted">Cargando tokens...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para invalidar token -->
+<div class="modal fade" id="invalidarTokenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Invalidación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas invalidar este token?</p>
+                <p class="text-muted">Esta acción no se puede deshacer. El token quedará permanentemente inutilizable.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="confirmarInvalidar">Invalidar Token</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let tokenParaInvalidar = null;
+
+// Cargar tokens al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    cargarTokens();
+});
+
+// Cargar lista de tokens
+function cargarTokens() {
+    const tbody = document.getElementById('tokensTableBody');
+    
+    // Mostrar loading
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <div class="mt-2 text-muted">Cargando tokens...</div>
+            </td>
+        </tr>
+    `;
+    
+    fetch('{{ url_for("listar_tokens") }}', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarTokens(data.tokens);
+            actualizarEstadisticas(data.tokens);
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error: ${data.error || 'Error desconocido'}
+                    </td>
+                </tr>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error de conexión al cargar tokens
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Mostrar tokens en la tabla
+function mostrarTokens(tokens) {
+    const tbody = document.getElementById('tokensTableBody');
+    
+    if (tokens.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4 text-muted">
+                    <i class="fas fa-inbox me-2"></i>
+                    No se encontraron tokens
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = tokens.map(token => {
+        const fechaCreacion = new Date(token.fecha_creacion).toLocaleString();
+        const fechaExpiracion = new Date(token.expira_en).toLocaleString();
+        const ahora = new Date();
+        const expira = new Date(token.expira_en);
+        const vencido = ahora > expira;
+        
+        let estadoClass, estadoText, estadoIcon;
+        if (token.usado) {
+            estadoClass = 'secondary';
+            estadoText = 'Usado';
+            estadoIcon = 'fa-check-circle';
+        } else if (vencido) {
+            estadoClass = 'danger';
+            estadoText = 'Vencido';
+            estadoIcon = 'fa-clock';
+        } else {
+            estadoClass = 'success';
+            estadoText = 'Activo';
+            estadoIcon = 'fa-key';
+        }
+        
+        return `
+            <tr>
+                <td>
+                    <code class="text-primary">${token.token_preview}</code>
+                </td>
+                <td>${token.usuario}</td>
+                <td>${token.descripcion || 'Sin descripción'}</td>
+                <td>${fechaCreacion}</td>
+                <td>${fechaExpiracion}</td>
+                <td>
+                    <span class="badge bg-${estadoClass}">
+                        <i class="fas ${estadoIcon} me-1"></i>
+                        ${estadoText}
+                    </span>
+                </td>
+                <td><small class="text-muted">${token.ip_origen || 'N/A'}</small></td>
+                <td>
+                    ${!token.usado && !vencido ? `
+                        <button class="btn btn-sm btn-outline-danger" 
+                                onclick="mostrarInvalidarToken(${token.id}, '${token.token_preview}')">
+                            <i class="fas fa-ban me-1"></i>Invalidar
+                        </button>
+                    ` : '<span class="text-muted small">No disponible</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Actualizar estadísticas
+function actualizarEstadisticas(tokens) {
+    const total = tokens.length;
+    const activos = tokens.filter(t => !t.usado && new Date(t.expira_en) > new Date()).length;
+    const usados = tokens.filter(t => t.usado).length;
+    const pendientes = tokens.filter(t => !t.usado).length;
+    
+    document.getElementById('totalTokens').textContent = total;
+    document.getElementById('tokensActivos').textContent = activos;
+    document.getElementById('tokensUsados').textContent = usados;
+    document.getElementById('tokensPendientes').textContent = pendientes;
+}
+
+// Mostrar modal para invalidar token
+function mostrarInvalidarToken(tokenId, tokenPreview) {
+    tokenParaInvalidar = tokenId;
+    const modal = new bootstrap.Modal(document.getElementById('invalidarTokenModal'));
+    modal.show();
+    
+    // Actualizar contenido del modal
+    const modalBody = document.querySelector('#invalidarTokenModal .modal-body p');
+    modalBody.textContent = `¿Estás seguro de que deseas invalidar el token ${tokenPreview}?`;
+}
+
+// Confirmar invalidación de token
+document.getElementById('confirmarInvalidar').addEventListener('click', function() {
+    if (!tokenParaInvalidar) return;
+    
+    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+    this.disabled = true;
+    
+    fetch(`/admin/token/${tokenParaInvalidar}/invalidar`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('invalidarTokenModal')).hide();
+            cargarTokens(); // Recargar lista
+        } else {
+            alert('Error: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al invalidar token');
+    })
+    .finally(() => {
+        // Restaurar botón
+        this.innerHTML = 'Invalidar Token';
+        this.disabled = false;
+        tokenParaInvalidar = null;
+    });
+});
+
+// Limpiar filtros
+function limpiarFiltros() {
+    document.getElementById('filtroEstado').value = '';
+    document.getElementById('filtroUsuario').value = '';
+    document.getElementById('filtroFechaDesde').value = '';
+    document.getElementById('filtroFechaHasta').value = '';
+    cargarTokens();
+}
+</script>
+{% endblock %}

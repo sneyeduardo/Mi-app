@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Registro - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus text-iunp-success" style="font-size: 3rem;"></i>
+                    <h2 class="card-title mt-3">Registro de Usuario</h2>
+                    <p class="text-muted">Completa tus datos para acceder al sistema</p>
+                </div>
+                
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{ form.nombre.label(class="form-label") }}
+                            {{ form.nombre(class="form-control", placeholder="Ej: juan_perez") }}
+                            {% if form.nombre.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.nombre.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control", placeholder="correo@ejemplo.com") }}
+                            {% if form.email.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.email.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.cedula.label(class="form-label") }}
+                            {{ form.cedula(class="form-control", placeholder="12345678") }}
+                            {% if form.cedula.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.cedula.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control", placeholder="Mínimo 6 caracteres") }}
+                            {% if form.password.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.password.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            {{ form.password2.label(class="form-label") }}
+                            {{ form.password2(class="form-control", placeholder="Confirma tu contraseña") }}
+                            {% if form.password2.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.password2.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-iunp-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Nota:</strong> El primer usuario registrado será automáticamente administrador.
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-iunp-success btn-lg") }}
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="text-muted mb-0">¿Ya tienes cuenta?</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-iunp-outline-primary mt-2">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

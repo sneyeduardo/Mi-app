@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% set title = "Equipos - Sistema de Préstamos" %}
+
+{% block content %}
+<!-- Header de Equipos -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-laptop text-primary me-3"></i>
+            Catálogo de Equipos
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Gestiona y consulta todos los equipos disponibles
+        </p>
+    </div>
+    {% if current_user.es_admin() %}
+    <div class="text-end">
+        <a href="{{ url_for('crear_equipo') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Agregar Equipo
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Filtros de Búsqueda -->
+<div class="card border-0 shadow-custom mb-4">
+    <div class="card-header border-0 d-flex align-items-center">
+        <i class="fas fa-filter text-primary me-3"></i>
+        <h5 class="mb-0">Filtros de Búsqueda</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <label class="form-label fw-bold">Búsqueda</label>
+                <input type="text" class="form-control" name="busqueda" 
+                       value="{{ busqueda }}" placeholder="Buscar por nombre, código o descripción...">
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-bold">Categoría</label>
+                <select class="form-select" name="categoria">
+                    <option value="">Todas las categorías</option>
+                    {% for tipo in tipos_disponibles %}
+                    <option value="{{ tipo }}" {% if tipo == tipo_filtro %}selected{% endif %}>
+                        {{ tipo.title().replace('_', ' ') }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label fw-bold">Estado</label>
+                <select class="form-select" name="estado">
+                    <option value="">Todos los estados</option>
+                    <option value="disponible" {% if estado_filtro == 'disponible' %}selected{% endif %}>Disponible</option>
+                    <option value="prestado" {% if estado_filtro == 'prestado' %}selected{% endif %}>Prestado</option>
+                    <option value="mantenimiento" {% if estado_filtro == 'mantenimiento' %}selected{% endif %}>En Mantenimiento</option>
+                    <option value="dañado" {% if estado_filtro == 'dañado' %}selected{% endif %}>Dañado</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6 d-flex align-items-end">
+                <div class="w-100">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Estadísticas de Equipos -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-laptop text-primary" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ equipos.total }}</h3>
+                <p class="text-muted mb-0">Total Equipos</p>
+                <small class="text-success">
+                    <i class="fas fa-arrow-up me-1"></i>{{ equipos.per_page }} por página
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ estadisticas['equipos_disponibles'] }}</h3>
+                <p class="text-muted mb-0">Disponibles</p>
+                <small class="text-success">
+                    <i class="fas fa-check me-1"></i>Listos para préstamo
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-handshake text-warning" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ estadisticas['equipos_prestados'] }}</h3>
+                <p class="text-muted mb-0">Prestados</p>
+                <small class="text-warning">
+                    <i class="fas fa-clock me-1"></i>En uso
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-tools text-danger" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ estadisticas['equipos_mantenimiento'] + estadisticas['equipos_dañados'] }}</h3>
+                <p class="text-muted mb-0">Mantenimiento</p>
+                <small class="text-danger">
+                    <i class="fas fa-wrench me-1"></i>No disponibles
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Equipos -->
+<div class="card border-0 shadow-custom">
+    <div class="card-header border-0 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 d-flex align-items-center">
+            <i class="fas fa-list text-primary me-3"></i>
+            Equipos ({{ equipos.total }} encontrados)
+        </h5>
+        {% if current_user.es_admin() %}
+        <a href="{{ url_for('crear_equipo') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i>Agregar
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if equipos.items %}
+            <div class="row">
+                {% for equipo in equipos.items %}
+                <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h6 class="card-title mb-0 fw-bold">
+                                    <i class="fas fa-laptop text-primary me-2"></i>
+                                    {{ equipo.nombre }}
+                                </h6>
+                                {% if equipo.estado == 'disponible' %}
+                                    <span class="badge bg-success">Disponible</span>
+                                {% elif equipo.estado == 'prestado' %}
+                                    <span class="badge bg-warning text-dark">Prestado</span>
+                                {% elif equipo.estado == 'mantenimiento' %}
+                                    <span class="badge bg-info text-dark">Mantenimiento</span>
+                                {% elif equipo.estado == 'dañado' %}
+                                    <span class="badge bg-danger">Dañado</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-tag me-1"></i>Categoría
+                                    </small>
+                                    <span class="fw-bold">{{ equipo.categoria.value.title().replace('_', ' ') }}</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-barcode me-1"></i>Código
+                                    </small>
+                                    <span class="fw-bold">{{ equipo.codigo }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if equipo.descripcion %}
+                            <p class="card-text small text-muted mb-3">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {{ equipo.descripcion[:120] }}{% if equipo.descripcion|length > 120 %}...{% endif %}
+                            </p>
+                            {% endif %}
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('ver_equipo', equipo_id=equipo.id) }}" 
+                                   class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalles
+                                </a>
+                                
+                                {% if equipo.estado == 'disponible' %}
+                                    <a href="{{ url_for('solicitar_prestamo', equipo_id=equipo.id) }}" 
+                                       class="btn btn-success btn-sm">
+                                        <i class="fas fa-hand-pointer me-1"></i>Solicitar
+                                    </a>
+                                {% elif equipo.estado == 'prestado' %}
+                                    <button class="btn btn-warning btn-sm" disabled>
+                                        <i class="fas fa-clock me-1"></i>Prestado
+                                    </button>
+                                {% elif equipo.estado == 'mantenimiento' %}
+                                    <button class="btn btn-info btn-sm" disabled>
+                                        <i class="fas fa-tools me-1"></i>Mantenimiento
+                                    </button>
+                                {% elif equipo.estado == 'dañado' %}
+                                    <button class="btn btn-danger btn-sm" disabled>
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Dañado
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer text-muted small bg-light">
+                            <div class="d-flex justify-content-between">
+                                <span>
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Agregado: {{ equipo.fecha_creacion.strftime('%d/%m/%Y') if equipo.fecha_creacion else 'N/A' }}
+                                </span>
+                                {% if equipo.usuario_actual %}
+                                <span class="text-warning">
+                                    <i class="fas fa-user me-1"></i>
+                                    Por: {{ equipo.usuario_actual.nombre }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Paginación -->
+            {% if equipos.pages > 1 %}
+            <nav aria-label="Paginación de equipos" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if equipos.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('listar_equipos', page=equipos.prev_num, busqueda=busqueda, categoria=categoria_filtro, estado=estado_filtro) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in equipos.iter_pages() %}
+                    {% if page_num %}
+                    {% if page_num != equipos.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('listar_equipos', page=page_num, busqueda=busqueda, categoria=categoria_filtro, estado=estado_filtro) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    
+                    {% if equipos.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('listar_equipos', page=equipos.next_num, busqueda=busqueda, categoria=categoria_filtro, estado=estado_filtro) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox text-muted" style="font-size: 4rem;"></i>
+                <h4 class="text-muted mt-3">No se encontraron equipos</h4>
+                <p class="text-muted">
+                    {% if busqueda or categoria_filtro or estado_filtro %}
+                        Intenta modificar los filtros de búsqueda o limpiar los filtros.
+                    {% else %}
+                        Aún no hay equipos registrados en el sistema.
+                    {% endif %}
+                </p>
+                {% if current_user.es_admin() and not (busqueda or categoria_filtro or estado_filtro) %}
+                <a href="{{ url_for('crear_equipo') }}" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus-circle me-2"></i>Agregar Primer Equipo
+                </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-submit del formulario cuando cambian los filtros
+document.addEventListener('DOMContentLoaded', function() {
+    const selectores = document.querySelectorAll('select[name="categoria"], select[name="estado"]');
+    selectores.forEach(selector => {
+        selector.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Enter en el campo de búsqueda
+    const busquedaInput = document.querySelector('input[name="busqueda"]');
+    if (busquedaInput) {
+        busquedaInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.form.submit();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% set title = "Gestión de Préstamos" %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-clipboard-list text-success me-3"></i>
+            Gestión de Préstamos
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Supervisa y administra todos los préstamos del sistema
+        </p>
+    </div>
+    <div class="text-end">
+        <div class="btn-group">
+            <a href="{{ url_for('admin_prestamos') }}?estado=" class="btn btn-outline-success">
+                <i class="fas fa-list me-1"></i>Todos
+            </a>
+            <a href="{{ url_for('admin_prestamos') }}?estado=solicitado" class="btn btn-warning">
+                <i class="fas fa-clock me-1"></i>Pendientes ({{ prestamos_por_aprobar or 0 }})
+            </a>
+            <a href="{{ url_for('admin_prestamos') }}?estado=vencido" class="btn btn-danger">
+                <i class="fas fa-exclamation-triangle me-1"></i>Vencidos ({{ prestamos_vencidos or 0 }})
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas de préstamos -->
+<div class="row mb-4">
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-3">
+                <div class="mb-2">
+                    <i class="fas fa-clock text-warning" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1">{{ prestamos.items|selectattr('estado', 'equalto', 'solicitado')|list|length }}</h4>
+                <p class="text-muted mb-0 small">Solicitados</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-3">
+                <div class="mb-2">
+                    <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1">{{ prestamos.items|selectattr('estado', 'equalto', 'aprobado')|list|length }}</h4>
+                <p class="text-muted mb-0 small">Aprobados</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-3">
+                <div class="mb-2">
+                    <i class="fas fa-handshake text-info" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1">{{ prestamos.items|selectattr('estado', 'equalto', 'devuelto')|list|length }}</h4>
+                <p class="text-muted mb-0 small">Devueltos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-3">
+                <div class="mb-2">
+                    <i class="fas fa-times-circle text-danger" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1">{{ prestamos.items|selectattr('estado', 'equalto', 'rechazado')|list|length }}</h4>
+                <p class="text-muted mb-0 small">Rechazados</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-3">
+                <div class="mb-2">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1">{{ prestamos.items|selectattr('estado', 'equalto', 'vencido')|list|length }}</h4>
+                <p class="text-muted mb-0 small">Vencidos</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-2 col-md-4 col-6 mb-3">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-3">
+                <div class="mb-2">
+                    <i class="fas fa-chart-line text-primary" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="text-dark mb-1">{{ prestamos.total }}</h4>
+                <p class="text-muted mb-0 small">Total</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertas de atención -->
+{% if prestamos_por_aprobar > 0 or prestamos_vencidos > 0 %}
+<div class="row mb-4">
+    {% if prestamos_por_aprobar > 0 %}
+    <div class="col-md-6 mb-3">
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="fas fa-clock me-2"></i>
+            <strong>{{ prestamos_por_aprobar }} préstamos pendientes de aprobación</strong>
+            <br><small>Requieren revisión inmediata</small>
+            <a href="{{ url_for('admin_prestamos') }}?estado=solicitado" class="btn btn-sm btn-warning ms-2">
+                Ver ahora
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if prestamos_vencidos > 0 %}
+    <div class="col-md-6 mb-3">
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>{{ prestamos_vencidos }} préstamos vencidos</strong>
+            <br><small>Requieren devolución urgente</small>
+            <a href="{{ url_for('admin_prestamos') }}?estado=vencido" class="btn btn-sm btn-danger ms-2">
+                Ver ahora
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Filtros y búsqueda -->
+<div class="card border-0 shadow-custom mb-4">
+    <div class="card-header border-0">
+        <h5 class="mb-0 d-flex align-items-center">
+            <i class="fas fa-filter text-success me-2"></i>
+            Filtros de Búsqueda
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Buscar préstamo</label>
+                <input type="text" name="buscar" class="form-control" placeholder="Usuario, equipo, código..." 
+                       value="{{ request.args.get('buscar', '') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="solicitado" {{ 'selected' if request.args.get('estado') == 'solicitado' else '' }}>Solicitado</option>
+                    <option value="aprobado" {{ 'selected' if request.args.get('estado') == 'aprobado' else '' }}>Aprobado</option>
+                    <option value="devuelto" {{ 'selected' if request.args.get('estado') == 'devuelto' else '' }}>Devuelto</option>
+                    <option value="rechazado" {{ 'selected' if request.args.get('estado') == 'rechazado' else '' }}>Rechazado</option>
+                    <option value="vencido" {{ 'selected' if request.args.get('estado') == 'vencido' else '' }}>Vencido</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Fecha desde</label>
+                <input type="date" name="fecha_desde" class="form-control" 
+                       value="{{ request.args.get('fecha_desde', '') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Fecha hasta</label>
+                <input type="date" name="fecha_hasta" class="form-control" 
+                       value="{{ request.args.get('fecha_hasta', '') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Usuario</label>
+                <input type="text" name="usuario" class="form-control" placeholder="Nombre o cédula..." 
+                       value="{{ request.args.get('usuario', '') }}">
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de préstamos -->
+<div class="card border-0 shadow-custom">
+    <div class="card-header border-0 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 d-flex align-items-center">
+            <i class="fas fa-list text-success me-2"></i>
+            Lista de Préstamos
+        </h5>
+        <div class="text-muted small">
+            Mostrando {{ prestamos.per_page * (prestamos.page - 1) + 1 }}-{{ prestamos.per_page * prestamos.page if prestamos.has_next else prestamos.total }} de {{ prestamos.total }} préstamos
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if prestamos.items %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Equipo</th>
+                        <th>Fechas</th>
+                        <th>Estado</th>
+                        <th>Duración</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestamo in prestamos.items %}
+                    <tr class="{{ 'table-warning' if prestamo.estado == 'solicitado' else '' }} {{ 'table-danger' if prestamo.estado == 'vencido' else '' }}">
+                        <td>
+                            <strong class="text-primary">#{{ prestamo.id }}</strong>
+                            <br><small class="text-muted">{{ prestamo.fecha_solicitud.strftime('%d/%m/%Y') }}</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <i class="fas fa-user-circle text-muted" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <strong>{{ prestamo.usuario.nombre_completo }}</strong>
+                                    <br><small class="text-muted">Cédula: {{ prestamo.usuario.cedula }}</small>
+                                    {% if prestamo.usuario.tipo_usuario == 'admin' %}
+                                        <br><span class="badge bg-warning small">Admin</span>
+                                    {% elif prestamo.usuario.tipo_usuario == 'profesor' %}
+                                        <br><span class="badge bg-primary small">Profesor</span>
+                                    {% else %}
+                                        <br><span class="badge bg-success small">Estudiante</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    {% if prestamo.equipo.categoria == 'computadora' %}
+                                        <i class="fas fa-desktop text-primary" style="font-size: 1.5rem;"></i>
+                                    {% elif prestamo.equipo.categoria == 'proyector' %}
+                                        <i class="fas fa-video text-warning" style="font-size: 1.5rem;"></i>
+                                    {% elif prestamo.equipo.categoria == 'laboratorio' %}
+                                        <i class="fas fa-flask text-success" style="font-size: 1.5rem;"></i>
+                                    {% elif prestamo.equipo.categoria == 'audiovisual' %}
+                                        <i class="fas fa-volume-up text-danger" style="font-size: 1.5rem;"></i>
+                                    {% elif prestamo.equipo.categoria == 'herramientas' %}
+                                        <i class="fas fa-tools text-secondary" style="font-size: 1.5rem;"></i>
+                                    {% else %}
+                                        <i class="fas fa-cog text-muted" style="font-size: 1.5rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <strong>{{ prestamo.equipo.nombre }}</strong>
+                                    <br><small class="text-muted">Código: {{ prestamo.equipo.codigo }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <small>
+                                <strong>Inicio:</strong> {{ prestamo.fecha_inicio.strftime('%d/%m/%Y') }}<br>
+                                <strong>Fin:</strong> {{ prestamo.fecha_fin_programada.strftime('%d/%m/%Y') }}
+                                {% if prestamo.fecha_devolucion %}
+                                <br><strong>Devuelto:</strong> {{ prestamo.fecha_devolucion.strftime('%d/%m/%Y') }}
+                                {% endif %}
+                            </small>
+                        </td>
+                        <td>
+                            {% if prestamo.estado == 'solicitado' %}
+                                <span class="badge bg-warning">Solicitado</span>
+                            {% elif prestamo.estado == 'aprobado' %}
+                                <span class="badge bg-success">Aprobado</span>
+                            {% elif prestamo.estado == 'devuelto' %}
+                                <span class="badge bg-info">Devuelto</span>
+                            {% elif prestamo.estado == 'rechazado' %}
+                                <span class="badge bg-danger">Rechazado</span>
+                            {% elif prestamo.estado == 'vencido' %}
+                                <span class="badge bg-warning">Vencido</span>
+                            {% endif %}
+                            <br><small class="text-muted">{{ prestamo.duracion_dias }} días</small>
+                        </td>
+                        <td>
+                            {% if prestamo.estado == 'aprobado' %}
+                                {% if prestamo.dias_restantes > 0 %}
+                                    <span class="badge bg-success">{{ prestamo.dias_restantes }} días restantes</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Vencido</span>
+                                {% endif %}
+                            {% elif prestamo.estado == 'solicitado' %}
+                                <span class="badge bg-warning">Esperando aprobación</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">Completado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('ver_prestamo', prestamo_id=prestamo.id) }}">
+                                            <i class="fas fa-eye me-2"></i>Ver Detalles
+                                        </a>
+                                    </li>
+                                    
+                                    {% if prestamo.estado == 'solicitado' %}
+                                    <li>
+                                        <a class="dropdown-item text-success" href="{{ url_for('aprobar_prestamo', prestamo_id=prestamo.id) }}">
+                                            <i class="fas fa-check me-2"></i>Aprobar/Rechazar
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    {% if prestamo.estado == 'aprobado' %}
+                                    <li>
+                                        <a class="dropdown-item text-info" href="{{ url_for('devolver_equipo', prestamo_id=prestamo.id) }}">
+                                            <i class="fas fa-undo me-2"></i>Registrar Devolución
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    <li><hr class="dropdown-divider"></li>
+                                    
+                                    {% if prestamo.aprobado_por %}
+                                    <li>
+                                        <small class="dropdown-item-text text-muted">
+                                            Aprobado por: {{ prestamo.aprobado_por.nombre_completo }}
+                                        </small>
+                                    </li>
+                                    {% endif %}
+                                    
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" onclick="cancelarPrestamo({{ prestamo.id }})">
+                                            <i class="fas fa-ban me-2"></i>Cancelar Préstamo
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-clipboard-list text-muted mb-3" style="font-size: 3rem;"></i>
+            <h5 class="text-muted">No se encontraron préstamos</h5>
+            <p class="text-muted">No hay préstamos que coincidan con los filtros aplicados.</p>
+            <a href="{{ url_for('admin_prestamos') }}" class="btn btn-success">
+                <i class="fas fa-refresh me-2"></i>Limpiar Filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if prestamos.pages > 1 %}
+<nav aria-label="Paginación de préstamos" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{ 'disabled' if not prestamos.has_prev else '' }}">
+            <a class="page-link" href="{{ url_for('admin_prestamos', page=prestamos.prev_num, **request.args) }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        
+        {% for page_num in prestamos.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != prestamos.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin_prestamos', page=page_num, **request.args) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        <li class="page-item {{ 'disabled' if not prestamos.has_next else '' }}">
+            <a class="page-link" href="{{ url_for('admin_prestamos', page=prestamos.next_num, **request.args) }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function cancelarPrestamo(prestamoId) {
+    if (confirm('¿Está seguro de que desea cancelar este préstamo? Esta acción no se puede deshacer.')) {
+        fetch(`/admin/prestamo/${prestamoId}/cancelar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+</script>
+{% endblock %}

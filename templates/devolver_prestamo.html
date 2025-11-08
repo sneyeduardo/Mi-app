@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Devolver Equipo - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-arrow-left"></i> Devolver Equipo
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Información del Préstamo -->
+                <div class="alert alert-iunp-info">
+                    <h5 class="alert-heading"><i class="fas fa-info-circle"></i> Información del Préstamo</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Equipo:</strong> {{ prestamo.equipo.nombre if prestamo.equipo else 'Equipo eliminado' }}<br>
+                            <strong>Tipo:</strong> {{ prestamo.equipo.tipo if prestamo.equipo else 'N/A' }}<br>
+                            <strong>ID:</strong> {{ prestamo.equipo.id if prestamo.equipo else 'N/A' }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Usuario:</strong> {{ prestamo.usuario.nombre if prestamo.usuario else 'Usuario eliminado' }}<br>
+                            <strong>Fecha Préstamo:</strong> {{ prestamo.fecha_prestamo.strftime('%d/%m/%Y %H:%M') if prestamo.fecha_prestamo else 'N/A' }}<br>
+                            <strong>Días Transcurridos:</strong> 
+                            {% if prestamo.fecha_prestamo %}
+                                {% set dias = (moment().date() - prestamo.fecha_prestamo.date()).days %}
+                                <span class="badge 
+                                    {% if dias <= 7 %}badge-iu-success
+                                    {% elif dias <= 14 %}badge-iu-warning
+                                    {% else %}badge-iu-danger{% endif %}">
+                                    {{ (moment().date() - prestamo.fecha_prestamo.date()).days }} días
+                                </span>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if prestamo.observaciones %}
+                    <hr>
+                    <strong>Observaciones del Préstamo:</strong><br>
+                    <small class="text-muted">{{ prestamo.observaciones }}</small>
+                    {% endif %}
+                </div>
+                
+                <!-- Formulario de Devolución -->
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        {{ form.observaciones.label(class="form-label") }}
+                        {{ form.observaciones(class="form-control", rows="4", placeholder="Opcional: Describe el estado del equipo al momento de la devolución...") }}
+                        {% if form.observaciones.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.observaciones.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-lightbulb"></i> 
+                            Las observaciones ayudan a mantener un registro del estado de los equipos.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-iunp-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Confirmación de Devolución:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>El equipo será marcado como "Disponible" nuevamente</li>
+                            <li>Se registrará la fecha y hora de devolución</li>
+                            <li>Esta acción no se puede deshacer</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex gap-3">
+                        <a href="{{ url_for('prestamos') }}" class="btn btn-iunp-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        {{ form.submit(class="btn btn-iunp-warning flex-fill") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirmar devolución
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!confirm('¿Estás seguro de confirmar la devolución de este equipo?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Contador de caracteres para observaciones
+    const observacionesTextarea = document.querySelector('textarea[name="observaciones"]');
+    if (observacionesTextarea) {
+        const maxLength = 500;
+        const counter = document.createElement('small');
+        counter.className = 'text-muted float-end';
+        observacionesTextarea.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const remaining = maxLength - observacionesTextarea.value.length;
+            counter.textContent = `${observacionesTextarea.value.length}/${maxLength} caracteres`;
+            counter.className = remaining < 50 ? 'text-warning float-end' : 'text-muted float-end';
+        }
+        
+        observacionesTextarea.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+});
+</script>
+{% endblock %}

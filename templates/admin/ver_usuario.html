@@ -1,0 +1,277 @@
+{% extends "admin/admin_layout.html" %}
+
+{% block title %}Ver Usuario - {{ usuario.nombre }} {{ usuario.apellido }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="fas fa-user me-2"></i>Detalles del Usuario</h2>
+                    <p class="text-muted mb-0">Información completa del usuario</p>
+                </div>
+                <a href="{{ url_for('admin_usuarios') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Gestión de Usuarios
+                </a>
+            </div>
+
+            <div class="row">
+                <!-- Información Personal -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Información Personal</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>ID:</strong></div>
+                                <div class="col-sm-8">{{ usuario.id }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Nombre:</strong></div>
+                                <div class="col-sm-8">{{ usuario.nombre }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Apellido:</strong></div>
+                                <div class="col-sm-8">{{ usuario.apellido }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Email:</strong></div>
+                                <div class="col-sm-8">{{ usuario.email }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Teléfono:</strong></div>
+                                <div class="col-sm-8">{{ usuario.telefono or 'No especificado' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Dirección:</strong></div>
+                                <div class="col-sm-8">{{ usuario.direccion or 'No especificada' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Fecha de Nacimiento:</strong></div>
+                                <div class="col-sm-8">{{ usuario.fecha_nacimiento.strftime('%d/%m/%Y') if usuario.fecha_nacimiento else 'No especificada' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Estado:</strong></div>
+                                <div class="col-sm-8">
+                                    {% if usuario.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Académica -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Información Académica</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Código:</strong></div>
+                                <div class="col-sm-8">{{ usuario.codigo_estudiante or 'N/A' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Especialidad:</strong></div>
+                                <div class="col-sm-8">{{ usuario.especialidad or 'No especificada' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Semestre:</strong></div>
+                                <div class="col-sm-8">{{ usuario.semestre or 'N/A' }}</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Tipo:</strong></div>
+                                <div class="col-sm-8">{{ usuario.tipo_usuario.title() if usuario.tipo_usuario else 'No especificado' }}</div>
+                            </div>
+                            {% if usuario.rol %}
+                            <div class="row mb-3">
+                                <div class="col-sm-4"><strong>Rol:</strong></div>
+                                <div class="col-sm-8">{{ usuario.rol.title() }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Estadísticas de Préstamos -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Estadísticas de Préstamos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-sm-6"><strong>Préstamos Activos:</strong></div>
+                                <div class="col-sm-6">
+                                    <span class="badge bg-danger fs-6">{{ prestamos_activos }}</span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-6"><strong>Total de Préstamos:</strong></div>
+                                <div class="col-sm-6">
+                                    <span class="badge bg-info fs-6">{{ prestamos_totales }}</span>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-6"><strong>Historial:</strong></div>
+                                <div class="col-sm-6">
+                                    <a href="{{ url_for('admin_prestamos') }}?filtro_usuario={{ usuario.id }}" class="btn btn-sm btn-outline-primary">
+                                        Ver Historial Completo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="col-lg-6 col-md-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Acciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                {% if usuario.activo %}
+                                <button type="button" class="btn btn-warning" 
+                                        onclick="toggleUsuario({{ usuario.id }})"
+                                        data-bs-toggle="tooltip" title="Desactivar usuario">
+                                    <i class="fas fa-user-slash me-2"></i>Desactivar Usuario
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-success" 
+                                        onclick="toggleUsuario({{ usuario.id }})"
+                                        data-bs-toggle="tooltip" title="Activar usuario">
+                                    <i class="fas fa-user-check me-2"></i>Activar Usuario
+                                </button>
+                                {% endif %}
+                                
+                                <button type="button" class="btn btn-info" 
+                                        onclick="resetPassword({{ usuario.id }})"
+                                        data-bs-toggle="tooltip" title="Resetear contraseña a 'password123'">
+                                    <i class="fas fa-key me-2"></i>Resetear Contraseña
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+function toggleUsuario(usuarioId) {
+    if (!confirm('¿Estás seguro de que quieres cambiar el estado de este usuario?')) {
+        return;
+    }
+
+    fetch(`/admin/usuario/${usuarioId}/toggle`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.success);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    });
+}
+
+function resetPassword(usuarioId) {
+    if (!confirm('¿Estás seguro de que quieres resetear la contraseña de este usuario? Se cambiará a "password123"')) {
+        return;
+    }
+
+    fetch(`/admin/usuario/${usuarioId}/reset-password`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.success);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión');
+    });
+}
+
+// Inicializar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    border: none;
+}
+
+.badge {
+    font-size: 0.9em;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.row > div {
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

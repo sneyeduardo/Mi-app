@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Préstamo - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-hand-pointer"></i> Solicitar Préstamo
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Información del Equipo -->
+                <div class="alert alert-iunp-info">
+                    <h5 class="alert-heading"><i class="fas fa-info-circle"></i> Equipo Seleccionado</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Nombre:</strong> {{ equipo.nombre }}<br>
+                            <strong>Tipo:</strong> {{ equipo.tipo }}<br>
+                            <strong>ID:</strong> {{ equipo.id }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Estado:</strong> 
+                            <span class="badge badge-iu-success">{{ equipo.estado|title }}</span><br>
+                            {% if equipo.descripcion %}
+                            <strong>Descripción:</strong><br>
+                            <small class="text-muted">{{ equipo.descripcion }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulario de Solicitud -->
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        {{ form.motivo.label(class="form-label") }}
+                        {{ form.motivo(class="form-control", rows="4", placeholder="Describe brevemente para qué necesitas este equipo...") }}
+                        {% if form.motivo.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.motivo.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            <i class="fas fa-lightbulb"></i> 
+                            Proporcionar un motivo ayuda a los administradores a procesar tu solicitud más rápidamente.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-iunp-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Importante:</strong> Una vez enviada la solicitud, deberás esperar la aprobación de un administrador antes de poder usar el equipo.
+                    </div>
+                    
+                    <div class="d-flex gap-3">
+                        <a href="{{ url_for('detalle_equipo', equipo_id=equipo.id) }}" class="btn btn-iunp-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancelar
+                        </a>
+                        {{ form.submit(class="btn btn-iunp-success flex-fill") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirmar envío de solicitud
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!confirm('¿Estás seguro de enviar esta solicitud de préstamo?')) {
+            e.preventDefault();
+        }
+    });
+    
+    // Contador de caracteres para el motivo
+    const motivoTextarea = document.querySelector('textarea[name="motivo"]');
+    if (motivoTextarea) {
+        const maxLength = 500;
+        const counter = document.createElement('small');
+        counter.className = 'text-muted float-end';
+        motivoTextarea.parentNode.appendChild(counter);
+        
+        function updateCounter() {
+            const remaining = maxLength - motivoTextarea.value.length;
+            counter.textContent = `${motivoTextarea.value.length}/${maxLength} caracteres`;
+            counter.className = remaining < 50 ? 'text-warning float-end' : 'text-muted float-end';
+        }
+        
+        motivoTextarea.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+});
+</script>
+{% endblock %}

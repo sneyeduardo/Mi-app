@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% set title = "Generar Token de Acceso" %}
+
+{% block content %}
+<!-- Header de token -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-key text-warning me-3"></i>
+            Generar Token de Acceso Único
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Genera un token temporal para acceso administrativo de emergencia
+        </p>
+    </div>
+    <div>
+        <a href="{{ url_for('listar_tokens') }}" class="btn btn-outline-primary">
+            <i class="fas fa-list me-2"></i>Ver Todos los Tokens
+        </a>
+    </div>
+</div>
+
+<!-- Información de seguridad -->
+<div class="alert alert-warning border-0 shadow-sm" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-exclamation-triangle text-warning me-3 fs-4"></i>
+        <div>
+            <h5 class="alert-heading mb-1">Información de Seguridad</h5>
+            <p class="mb-0">
+                Los tokens de acceso único permiten autenticación temporal sin credenciales regulares. 
+                Se generan con una duración máxima de 30 minutos y pueden ser utilizados una sola vez.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjeta principal para generar token -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header bg-gradient bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>Generar Nuevo Token
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="generarTokenForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="descripcion" class="form-label fw-bold">
+                                    <i class="fas fa-tag me-2"></i>Descripción del Token
+                                </label>
+                                <input type="text" class="form-control" id="descripcion" name="descripcion" 
+                                       placeholder="Ej: Acceso de emergencia, mantenimiento..." required>
+                                <div class="form-text">Describe la razón para generar este token</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="duracion" class="form-label fw-bold">
+                                    <i class="fas fa-clock me-2"></i>Duración (minutos)
+                                </label>
+                                <select class="form-select" id="duracion" name="duracion">
+                                    <option value="15">15 minutos</option>
+                                    <option value="30" selected>30 minutos</option>
+                                    <option value="60">1 hora</option>
+                                </select>
+                                <div class="form-text">Tiempo máximo de validez del token</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-key me-2"></i>Generar Token
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Resultado del token generado -->
+                <div id="tokenResult" class="mt-4" style="display: none;">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-check-circle me-2"></i>Token Generado Exitosamente
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold">Token de Acceso:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="tokenGenerado" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copiarToken()">
+                                            <i class="fas fa-copy"></i> Copiar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">URL de Acceso:</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="urlAcceso" readonly>
+                                        <button class="btn btn-outline-primary" type="button" onclick="copiarURL()">
+                                            <i class="fas fa-external-link-alt"></i> Abrir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <strong>Expira:</strong><br>
+                                        <span class="text-success" id="fechaExpiracion"></span>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Tipo:</strong><br>
+                                        <span class="badge bg-info">Acceso Único</span>
+                                    </div>
+                                    <div class="col-4">
+                                        <strong>Estado:</strong><br>
+                                        <span class="badge bg-success">Activo</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-3 mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Importante:</strong> Comparte este token de forma segura. 
+                                Solo puede ser utilizado una vez y expira automáticamente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel lateral de información -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header bg-gradient bg-secondary text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Información de Seguridad
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-user-lock text-primary me-2"></i>
+                    <strong>Usuario Actual:</strong><br>
+                    <span class="text-muted">{{ current_user.nombre_completo }}</span>
+                </div>
+                <div class="mb-3">
+                    <i class="fas fa-calendar-clock text-primary me-2"></i>
+                    <strong>Generado:</strong><br>
+                    <span class="text-muted">{{ moment().format('DD/MM/YYYY HH:mm') }}</span>
+                </div>
+                <div class="mb-3">
+                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                    <strong>IP Origen:</strong><br>
+                    <span class="text-muted">Detección automática</span>
+                </div>
+                
+                <hr>
+                
+                <div class="alert alert-warning py-2 mb-0">
+                    <small>
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Los tokens solo pueden ser utilizados una vez y se invalidan automáticamente al expirar.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('generarTokenForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Mostrar loading
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando...';
+    submitBtn.disabled = true;
+    
+    fetch('{{ url_for("generar_token_admin") }}', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar resultado
+            document.getElementById('tokenGenerado').value = data.token;
+            document.getElementById('urlAcceso').value = data.url;
+            document.getElementById('fechaExpiracion').textContent = new Date(data.expires_in_minutes * 60000).toLocaleString();
+            document.getElementById('tokenResult').style.display = 'block';
+            
+            // Scroll al resultado
+            document.getElementById('tokenResult').scrollIntoView({ behavior: 'smooth' });
+            
+            // Resetear formulario
+            this.reset();
+        } else {
+            alert('Error: ' + (data.error || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al generar token');
+    })
+    .finally(() => {
+        // Restaurar botón
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function copiarToken() {
+    const tokenInput = document.getElementById('tokenGenerado');
+    tokenInput.select();
+    document.execCommand('copy');
+    
+    // Feedback visual
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+    }, 2000);
+}
+
+function copiarURL() {
+    const urlInput = document.getElementById('urlAcceso');
+    urlInput.select();
+    document.execCommand('copy');
+    
+    // Feedback visual
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+    }, 2000);
+}
+</script>
+{% endblock %}

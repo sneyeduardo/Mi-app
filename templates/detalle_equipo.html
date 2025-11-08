@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}{{ equipo.nombre }} - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Información del Equipo -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-laptop"></i> {{ equipo.nombre }}
+                    {% if equipo.estado == 'disponible' %}
+                        <span class="badge badge-iu-success ms-2">Disponible</span>
+                    {% elif equipo.estado == 'prestado' %}
+                        <span class="badge badge-iu-warning ms-2">Prestado</span>
+                    {% elif equipo.estado == 'mantenimiento' %}
+                        <span class="badge badge-iu-danger ms-2">En Mantenimiento</span>
+                    {% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-iunp-primary">Información Básica</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>ID:</strong> {{ equipo.id }}</li>
+                            <li><strong>Tipo:</strong> {{ equipo.tipo }}</li>
+                            <li><strong>Estado:</strong> 
+                                {% if equipo.estado == 'disponible' %}
+                                    <span class="text-iunp-success">Disponible</span>
+                                {% elif equipo.estado == 'prestado' %}
+                                    <span class="text-iunp-warning">Prestado</span>
+                                {% elif equipo.estado == 'mantenimiento' %}
+                                    <span class="text-iunp-danger">En Mantenimiento</span>
+                                {% endif %}
+                            </li>
+                            <li><strong>Fecha de Registro:</strong> 
+                                {{ equipo.fecha_creacion.strftime('%d/%m/%Y %H:%M') if equipo.fecha_creacion else 'N/A' }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        {% if equipo.descripcion %}
+                        <h6 class="text-iunp-primary">Descripción</h6>
+                        <p class="text-muted">{{ equipo.descripcion }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historial de Préstamos -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history"></i> Historial de Préstamos</h5>
+            </div>
+            <div class="card-body">
+                {% if historial %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Fecha Préstamo</th>
+                                    <th>Fecha Devolución</th>
+                                    <th>Estado</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prestamo in historial %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ prestamo.usuario.nombre if prestamo.usuario else 'Usuario eliminado' }}</strong>
+                                    </td>
+                                    <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y %H:%M') if prestamo.fecha_prestamo else 'N/A' }}</td>
+                                    <td>
+                                        {% if prestamo.fecha_devolucion %}
+                                            {{ prestamo.fecha_devolucion.strftime('%d/%m/%Y %H:%M') }}
+                                        {% else %}
+                                            <span class="text-muted">Pendiente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prestamo.estado == 'activo' %}
+                                            <span class="badge badge-iu-warning">Activo</span>
+                                        {% elif prestamo.estado == 'devuelto' %}
+                                            <span class="badge badge-iu-success">Devuelto</span>
+                                        {% elif prestamo.estado == 'vencido' %}
+                                            <span class="badge badge-iu-danger">Vencido</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prestamo.observaciones %}
+                                            <small class="text-muted">{{ prestamo.observaciones[:50] }}{% if prestamo.observaciones|length > 50 %}...{% endif %}</small>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2 mb-0">Este equipo no tiene historial de préstamos aún.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Acciones -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones</h5>
+            </div>
+            <div class="card-body">
+                {% if equipo.esta_disponible() %}
+                    {% if current_user.is_admin() %}
+                        <a href="{{ url_for('prestamo_directo', equipo_id=equipo.id) }}" 
+                           class="btn btn-iunp-warning w-100 mb-2">
+                            <i class="fas fa-arrow-right"></i> Realizar Préstamo Directo
+                        </a>
+                        <a href="{{ url_for('editar_equipo', equipo_id=equipo.id) }}" 
+                           class="btn btn-iunp-info w-100 mb-2">
+                            <i class="fas fa-edit"></i> Editar Equipo
+                        </a>
+                        <a href="{{ url_for('eliminar_equipo', equipo_id=equipo.id) }}" 
+                           class="btn btn-iunp-danger w-100"
+                           onclick="return confirm('¿Estás seguro de eliminar este equipo?')">
+                            <i class="fas fa-trash"></i> Eliminar Equipo
+                        </a>
+                    {% else %}
+                        {% if solicitud_pendiente %}
+                            <div class="alert alert-iunp-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Solicitud Pendiente</strong><br>
+                                Ya tienes una solicitud pendiente para este equipo.
+                            </div>
+                        {% else %}
+                            <a href="{{ url_for('solicitar_prestamo', equipo_id=equipo.id) }}" 
+                               class="btn btn-iunp-success w-100 mb-2">
+                                <i class="fas fa-hand-pointer"></i> Solicitar Préstamo
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                {% elif equipo.esta_prestado() %}
+                    {% if current_user.is_admin() %}
+                        <!-- Mostrar quién tiene el equipo -->
+                        {% set prestamo_activo = historial|selectattr('estado', 'equalto', 'activo')|first %}
+                        {% if prestamo_activo %}
+                        <div class="alert alert-iunp-warning">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Equipo Prestado</strong><br>
+                            Usuario: {{ prestamo_activo.usuario.nombre }}<br>
+                            Desde: {{ prestamo_activo.fecha_prestamo.strftime('%d/%m/%Y') }}
+                        </div>
+                        <a href="{{ url_for('devolver_prestamo', prestamo_id=prestamo_activo.id) }}" 
+                           class="btn btn-iunp-warning w-100">
+                            <i class="fas fa-arrow-left"></i> Procesar Devolución
+                        </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-iunp-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>No Disponible</strong><br>
+                            Este equipo está actualmente prestado.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-iunp-danger">
+                        <i class="fas fa-tools"></i>
+                        <strong>En Mantenimiento</strong><br>
+                        Este equipo no está disponible temporalmente.
+                    </div>
+                {% endif %}
+                
+                <a href="{{ url_for('equipos') }}" class="btn btn-iunp-outline-secondary w-100 mt-2">
+                    <i class="fas fa-arrow-left"></i> Volver a Equipos
+                </a>
+            </div>
+        </div>
+        
+        <!-- Estadísticas del Equipo -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Estadísticas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-iunp-primary">{{ historial|length }}</h4>
+                        <small class="text-muted">Total Préstamos</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-iunp-success">{{ historial|selectattr('estado', 'equalto', 'devuelto')|list|length }}</h4>
+                        <small class="text-muted">Devueltos</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-iunp-warning">{{ historial|selectattr('estado', 'equalto', 'activo')|list|length }}</h4>
+                        <small class="text-muted">Activos</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-iunp-dark">{{ equipo.tipo }}</h4>
+                        <small class="text-muted">Categoría</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% set title = "Gestión de Usuarios" %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-users-cog text-primary me-3"></i>
+            Gestión de Usuarios
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Administra usuarios, roles y permisos del sistema
+        </p>
+    </div>
+    <div class="text-end">
+        <a href="{{ url_for('register') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+        </a>
+    </div>
+</div>
+
+<!-- Estadísticas de usuarios -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-graduate text-info" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ usuarios.total }}</h3>
+                <p class="text-muted mb-0">Total Usuarios</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-chalkboard-teacher text-primary" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ usuarios.items|selectattr('tipo_usuario.value', 'equalto', 'profesor')|list|length }}</h3>
+                <p class="text-muted mb-0">Profesores</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-graduate text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ usuarios.items|selectattr('tipo_usuario.value', 'equalto', 'estudiante')|list|length }}</h3>
+                <p class="text-muted mb-0">Estudiantes</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-shield text-warning" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ usuarios.items|selectattr('tipo_usuario.value', 'equalto', 'admin')|list|length }}</h3>
+                <p class="text-muted mb-0">Administradores</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros y búsqueda -->
+<div class="card border-0 shadow-custom mb-4">
+    <div class="card-header border-0">
+        <h5 class="mb-0 d-flex align-items-center">
+            <i class="fas fa-filter text-primary me-2"></i>
+            Filtros de Búsqueda
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Buscar por nombre o cédula</label>
+                <input type="text" name="buscar" class="form-control" placeholder="Ej: Juan, 12345..." 
+                       value="{{ request.args.get('buscar', '') }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tipo de Usuario</label>
+                <select name="tipo" class="form-select">
+                    <option value="">Todos los tipos</option>
+                    <option value="estudiante" {{ 'selected' if request.args.get('tipo') == 'estudiante' else '' }}>Estudiantes</option>
+                    <option value="profesor" {{ 'selected' if request.args.get('tipo') == 'profesor' else '' }}>Profesores</option>
+                    <option value="admin" {{ 'selected' if request.args.get('tipo') == 'admin' else '' }}>Administradores</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="activo" {{ 'selected' if request.args.get('estado') == 'activo' else '' }}>Activos</option>
+                    <option value="inactivo" {{ 'selected' if request.args.get('estado') == 'inactivo' else '' }}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="w-100">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de usuarios -->
+<div class="card border-0 shadow-custom">
+    <div class="card-header border-0 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 d-flex align-items-center">
+            <i class="fas fa-list text-primary me-2"></i>
+            Lista de Usuarios
+        </h5>
+        <div class="text-muted small">
+            Mostrando {{ usuarios.per_page * (usuarios.page - 1) + 1 }}-{{ usuarios.per_page * usuarios.page if usuarios.has_next else usuarios.total }} de {{ usuarios.total }} usuarios
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if usuarios.items %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Nombre Completo</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Fecha Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios.items %}
+                    <tr>
+                        <td>
+                            <strong>{{ usuario.cedula }}</strong>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    <i class="fas fa-user-circle text-muted" style="font-size: 1.5rem;"></i>
+                                </div>
+                                <div>
+                                    <strong>{{ usuario.nombre_completo }}</strong>
+                                    {% if usuario.id == current_user.id %}
+                                    <span class="badge bg-info ms-2">Tú</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ usuario.email or 'No registrado' }}</td>
+                        <td>{{ usuario.telefono or 'No registrado' }}</td>
+                        <td>
+                            {% if usuario.tipo_usuario.value == 'admin' %}
+                                <span class="badge bg-warning">Administrador</span>
+                            {% elif usuario.tipo_usuario.value == 'profesor' %}
+                                <span class="badge bg-primary">Profesor</span>
+                            {% else %}
+                                <span class="badge bg-success">Estudiante</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if usuario.activo %}
+                                <span class="badge bg-success">Activo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ usuario.fecha_registro.strftime('%d/%m/%Y') }}
+                            </small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('ver_usuario', usuario_id=usuario.id) }}">
+                                            <i class="fas fa-eye me-2"></i>Ver Detalles
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('editar_usuario', usuario_id=usuario.id) }}">
+                                            <i class="fas fa-edit me-2"></i>Editar
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    {% if usuario.id != current_user.id %}
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" onclick="toggleUsuario({{ usuario.id }})">
+                                            <i class="fas fa-{{ 'lock' if usuario.activo else 'unlock' }} me-2"></i>
+                                            {{ 'Desactivar' if usuario.activo else 'Activar' }}
+                                        </a>
+                                    </li>
+                                    {% endif %}
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('reset_password', usuario_id=usuario.id) }}">
+                                            <i class="fas fa-key me-2"></i>Resetear Contraseña
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-users text-muted mb-3" style="font-size: 3rem;"></i>
+            <h5 class="text-muted">No se encontraron usuarios</h5>
+            <p class="text-muted">No hay usuarios que coincidan con los filtros aplicados.</p>
+            <a href="{{ url_for('admin_usuarios') }}" class="btn btn-primary">
+                <i class="fas fa-refresh me-2"></i>Limpiar Filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if usuarios.pages > 1 %}
+<nav aria-label="Paginación de usuarios" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{ 'disabled' if not usuarios.has_prev else '' }}">
+            <a class="page-link" href="{{ url_for('admin_usuarios', page=usuarios.prev_num, **request.args) }}">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </li>
+        
+        {% for page_num in usuarios.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != usuarios.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin_usuarios', page=page_num, **request.args) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">...</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        <li class="page-item {{ 'disabled' if not usuarios.has_next else '' }}">
+            <a class="page-link" href="{{ url_for('admin_usuarios', page=usuarios.next_num, **request.args) }}">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleUsuario(usuarioId) {
+    if (confirm('¿Está seguro de que desea cambiar el estado de este usuario?')) {
+        fetch(`/admin/usuario/${usuarioId}/toggle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema de Préstamos IUNP{% endblock %}
+
+{% block content %}
+<!-- Bienvenida -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="bg-primary text-white p-4 rounded">
+            <h1 class="h2 mb-1">Bienvenido/a, {{ current_user.nombre }}!</h1>
+            <p class="mb-0">
+                <i class="fas fa-graduation-cap"></i> {{ current_user.carrera }} - 
+                <i class="fas fa-clock"></i> Turno {{ current_user.turno }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Mis Equipos</h5>
+                        <h2>{{ total_equipos }}</h2>
+                    </div>
+                    <i class="fas fa-table" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Mis Conflictos</h5>
+                        <h2>{{ conflictos|length }}</h2>
+                    </div>
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Conflictos</h5>
+                        <h2>{{ total_conflictos }}</h2>
+                    </div>
+                    <i class="fas fa-exclamation-octagon" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Días Activos</h5>
+                        <h2>{{ bloques_libres.keys()|length }}</h2>
+                    </div>
+                    <i class="fas fa-calendar-check" style="font-size: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones Rápidas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('equipos') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-plus-circle"></i> Agregar Equipo
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="{{ url_for('prestamos') }}" class="btn btn-info w-100">
+                            <i class="fas fa-chart-line"></i> Ver Recursos
+                        </a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button class="btn btn-success w-100" onclick="exportarHorarios()">
+                            <i class="fas fa-download"></i> Exportar Horarios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mis Horarios Recientes -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-tools"></i> Mis Equipos Recientes</h5>
+                <a href="{{ url_for('equipos') }}" class="btn btn-sm btn-outline-primary">Ver Todos</a>
+            </div>
+            <div class="card-body">
+                {% if equipos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Materia</th>
+                                    <th>Día</th>
+                                    <th>Horario</th>
+                                    <th>Aula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for equipo in equipos[:5] %}
+                                <tr>
+                                    <td><strong>{{ horario.materia }}</strong></td>
+                                    <td>{{ horario.dia_semana }}</td>
+                                    <td>{{ horario.hora_inicio }} - {{ horario.hora_fin }}</td>
+                                    <td><span class="badge bg-secondary">{{ horario.aula }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-tools text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2">No tienes equipos registrados aún.</p>
+                        <a href="{{ url_for('equipos') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Agregar tu primer equipo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mis Conflictos -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tools text-warning"></i> Equipos por Revisar</h5>
+            </div>
+            <div class="card-body">
+                {% if equipos %}
+                    {% for equipo in equipos[:3] %}
+                    <div class="alert alert-info alert-sm mb-2">
+                        <small>
+                            <strong>{{ equipo.nombre }}:</strong><br>
+                            {{ equipo.tipo }} - Estado: {{ equipo.estado|title }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                    {% if equipos|length > 3 %}
+                    <div class="text-center">
+                        <a href="{{ url_for('equipos') }}" class="btn btn-sm btn-info">
+                            Ver {{ equipos|length - 3 }} equipos más
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted text-center mb-0">
+                        <i class="fas fa-check-circle text-success"></i> No hay equipos por revisar
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                        <p class="text-success mt-2 mb-0">Sin conflictos detectados</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vista Semanal Rápida -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-week"></i> Vista Semanal Rápida</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-list"></i> Resumen de Mis Equipos</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if equipos %}
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Tipo</th>
+                                                    <th>Categoría</th>
+                                                    <th>Estado</th>
+                                                    <th>Disponible</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for equipo in equipos %}
+                                                <tr>
+                                                    <td>{{ equipo.nombre }}</td>
+                                                    <td>{{ equipo.tipo }}</td>
+                                                    <td>{{ equipo.categoria }}</td>
+                                                    <td>
+                                                        <span class="badge {% if equipo.estado == 'disponible' %}bg-success{% elif equipo.estado == 'mantenimiento' %}bg-warning{% else %}bg-danger{% endif %}">
+                                                            {{ equipo.estado|title }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge {% if equipo.disponible %}bg-success{% else %}bg-danger{% endif %}">
+                                                            {{ 'Sí' if equipo.disponible else 'No' }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-tools text-muted" style="font-size: 3rem;"></i>
+                                        <p class="text-muted mt-2">No tienes equipos registrados aún.</p>
+                                        <a href="{{ url_for('equipos') }}" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Agregar tu primer equipo
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function exportarHorarios() {
+    // Obtener datos de equipos
+    fetch('/api/equipos')
+        .then(response => response.json())
+        .then(data => {
+            // Crear archivo CSV
+            let csv = 'Materia,Dia,Hora Inicio,Hora Fin,Aula,Profesor\n';
+            data.forEach(horario => {
+                csv += `"${horario.materia}","${horario.dia_semana}","${horario.hora_inicio}","${horario.hora_fin}","${horario.aula}","${horario.profesor_nombre}"\n`;
+            });
+            
+            // Descargar archivo
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'equipos_' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            alert('Error al exportar equipos: ' + error);
+        });
+}
+</script>
+{% endblock %}

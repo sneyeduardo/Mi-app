@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Sistema General IUNP</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-primary: #E10026;        /* Rojo vibrante principal */
+            --color-primary-dark: #B8001C;   /* Rojo más oscuro para hover */
+            --color-text-dark: #363636;      /* Gris oscuro/carbón para texto */
+            --color-text-light: #666666;     /* Gris medio para texto secundario */
+            --color-bg-light: #F8F9FA;       /* Gris muy claro para fondos */
+            --color-border: #E0E0E0;         /* Gris claro para bordes */
+            --color-white: #FFFFFF;          /* Blanco puro */
+            --color-success: #28A745;        /* Verde para éxito */
+            --color-warning: #FFC107;        /* Amarillo para advertencias */
+            --color-danger: #DC3545;         /* Rojo para errores */
+            --color-info: #17A2B8;           /* Azul para información */
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--color-white);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+        }
+
+        /* Header personalizado */
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            box-shadow: 0 2px 20px rgba(225, 0, 38, 0.1);
+            border: none;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--color-white) !important;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--color-white) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #FFF !important;
+            transform: translateY(-1px);
+        }
+
+        .navbar-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--color-white);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        /* Logo de la universidad */
+        .university-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            object-position: center;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Botones personalizados */
+        .btn-primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            font-weight: 500;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+            border-color: var(--color-primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(225, 0, 38, 0.3);
+        }
+
+        .btn-outline-primary {
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: var(--color-white);
+        }
+
+        /* Cards personalizados */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(54, 54, 54, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(54, 54, 54, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #FAFAFA 0%, #F0F0F0 100%);
+            border-bottom: 1px solid var(--color-border);
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        /* Formularios */
+        .form-control, .form-select {
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 0.2rem rgba(225, 0, 38, 0.15);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--color-text-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Alertas personalizadas */
+        .alert-primary {
+            background-color: rgba(225, 0, 38, 0.1);
+            border-color: var(--color-primary);
+            color: var(--color-primary-dark);
+        }
+
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-color: var(--color-success);
+            color: #155724;
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 193, 7, 0.1);
+            border-color: var(--color-warning);
+            color: #856404;
+        }
+
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-color: var(--color-danger);
+            color: #721c24;
+        }
+
+        /* Tablas */
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(54, 54, 54, 0.08);
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: var(--color-white);
+            border: none;
+            font-weight: 600;
+            padding: 1rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(225, 0, 38, 0.05);
+        }
+
+        /* Footer */
+        .footer-custom {
+            background: linear-gradient(135deg, var(--color-text-dark) 0%, #2A2A2A 100%);
+            color: var(--color-white);
+            padding: 3rem 0 1rem;
+            margin-top: auto;
+        }
+
+        .footer-link {
+            color: #CCC;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--color-white);
+        }
+
+        /* Animaciones */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Utilidades adicionales */
+        .text-primary {
+            color: var(--color-primary) !important;
+        }
+
+        .bg-primary {
+            background-color: var(--color-primary) !important;
+        }
+
+        .border-primary {
+            border-color: var(--color-primary) !important;
+        }
+
+        .shadow-custom {
+            box-shadow: 0 4px 20px rgba(225, 0, 38, 0.1) !important;
+        }
+
+        /* Estados de carga */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .spinner-border-custom {
+            color: var(--color-primary) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-laptop me-2"></i>
+                Sistema de Préstamos
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('prestamos') }}">
+                            <i class="fas fa-chart-line me-1"></i>Recursos
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {{ current_user.nombre }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-user me-2"></i>Mi Perfil
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-graduation-cap me-2"></i>{{ current_user.carrera }}
+                            </a></li>
+                            <li><a class="dropdown-item" href="#">
+                                <i class="fas fa-clock me-2"></i>Turno {{ current_user.turno }}
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Footer -->
+    {% if current_user.is_authenticated %}
+    <footer class="footer-custom">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-laptop me-2"></i>
+                        IUNP
+                    </h5>
+                    <p class="text-light">Sistema de Gestión de Préstamos de Equipos Universitarios.</p>
+                    <p class="text-muted small">Facilitando el acceso y control de recursos tecnológicos.</p>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="text-white mb-3">Navegación</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('dashboard') }}" class="footer-link">Dashboard</a></li>
+                        <li><a href="{{ url_for('equipos') }}" class="footer-link">Equipos</a></li>
+                        <li><a href="{{ url_for('prestamos') }}" class="footer-link">Recursos</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6 class="text-white mb-3">Soporte</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="footer-link">Ayuda</a></li>
+                        <li><a href="#" class="footer-link">Contacto</a></li>
+                        <li><a href="#" class="footer-link">Documentación</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h6 class="text-white mb-3">Información</h6>
+                    <p class="text-muted small mb-0">
+                        <i class="fas fa-envelope me-2"></i>
+                        <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="98f1f6fef7d8f1edf6e8b6fdfcedb6eefd">[email&#160;protected]</a>
+                    </p>
+                    <p class="text-muted small mb-0">
+                        <i class="fas fa-phone me-2"></i>
+                        +58 212 123-4567
+                    </p>
+                    <p class="text-muted small">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        Universidad Nacional de Venezuela - Caracas, Los Dos Caminos
+                    </p>
+                </div>
+            </div>
+            
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+            
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted small mb-0">
+                        &copy; 2025 IUNP - Sistema de Préstamos. Todos los derechos reservados.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted small mb-0">
+                        Desarrollado por Sney Perez
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+    
+    <!-- Bootstrap JS -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

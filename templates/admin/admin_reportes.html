@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+{% set title = "Reportes y Estadísticas" %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-chart-bar text-warning me-3"></i>
+            Reportes y Estadísticas
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Análisis detallado del sistema de préstamos
+        </p>
+    </div>
+    <div class="text-end">
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="fas fa-download me-2"></i>Exportar
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="exportarReporte('pdf')">
+                    <i class="fas fa-file-pdf me-2 text-danger"></i>PDF
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportarReporte('excel')">
+                    <i class="fas fa-file-excel me-2 text-success"></i>Excel
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportarReporte('csv')">
+                    <i class="fas fa-file-csv me-2 text-info"></i>CSV
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen ejecutivo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-chart-line text-warning me-2"></i>
+                    Resumen Ejecutivo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-percentage text-success mb-2" style="font-size: 2.5rem;"></i>
+                            <h4 class="text-dark">87%</h4>
+                            <p class="text-muted mb-0">Tasa de Retorno</p>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>+5% vs mes anterior
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-clock text-warning mb-2" style="font-size: 2.5rem;"></i>
+                            <h4 class="text-dark">2.3</h4>
+                            <p class="text-muted mb-0">Días Promedio</p>
+                            <small class="text-info">
+                                <i class="fas fa-minus me-1"></i>Estable
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-star text-primary mb-2" style="font-size: 2.5rem;"></i>
+                            <h4 class="text-dark">4.8/5</h4>
+                            <p class="text-muted mb-0">Satisfacción</p>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up me-1"></i>Excelente
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-exclamation-triangle text-danger mb-2" style="font-size: 2.5rem;"></i>
+                            <h4 class="text-dark">3.2%</h4>
+                            <p class="text-muted mb-0">Tasa de Vencimiento</p>
+                            <small class="text-success">
+                                <i class="fas fa-arrow-down me-1"></i>-1.1% vs mes anterior
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Métricas por período -->
+<div class="row mb-4">
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-chart-area text-primary me-2"></i>
+                    Tendencia de Préstamos (Últimos 6 meses)
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="tendenciaChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-chart-pie text-info me-2"></i>
+                    Distribución por Estado
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="estadoChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Análisis detallado -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-laptop text-info me-2"></i>
+                    Equipos Más Solicitados
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Solicitudes</th>
+                                <th>% Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-desktop text-primary me-2"></i>
+                                    Laptop Dell Inspiron 15
+                                </td>
+                                <td><strong>42</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-primary" style="width: 85%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-video text-warning me-2"></i>
+                                    Proyector Epson
+                                </td>
+                                <td><strong>38</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-warning" style="width: 76%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-laptop text-info me-2"></i>
+                                    MacBook Air M1
+                                </td>
+                                <td><strong>35</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-info" style="width: 70%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-desktop text-success me-2"></i>
+                                    HP Pavilion Desktop
+                                </td>
+                                <td><strong>28</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" style="width: 56%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-flask text-danger me-2"></i>
+                                    Kit de Laboratorio
+                                </td>
+                                <td><strong>22</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-danger" style="width: 44%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-users text-success me-2"></i>
+                    Usuarios Más Activos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Préstamos</th>
+                                <th>Tasa Retorno</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-circle text-primary me-2"></i>
+                                    María González
+                                </td>
+                                <td><strong>18</strong></td>
+                                <td>
+                                    <span class="badge bg-success">100%</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-circle text-info me-2"></i>
+                                    Carlos Rodríguez
+                                </td>
+                                <td><strong>15</strong></td>
+                                <td>
+                                    <span class="badge bg-success">93%</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-circle text-warning me-2"></i>
+                                    Ana Martínez
+                                </td>
+                                <td><strong>14</strong></td>
+                                <td>
+                                    <span class="badge bg-success">100%</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-circle text-success me-2"></i>
+                                    Luis Fernández
+                                </td>
+                                <td><strong>12</strong></td>
+                                <td>
+                                    <span class="badge bg-warning">83%</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <i class="fas fa-user-circle text-danger me-2"></i>
+                                    Patricia López
+                                </td>
+                                <td><strong>11</strong></td>
+                                <td>
+                                    <span class="badge bg-success">91%</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categorías y análisis temporal -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-tags text-warning me-2"></i>
+                    Préstamos por Categoría
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoriaChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-calendar-alt text-primary me-2"></i>
+                    Actividad por Día de la Semana
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="semanaChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reportes rápidos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-file-alt text-info me-2"></i>
+                    Reportes Rápidos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-calendar-day text-primary mb-2" style="font-size: 2rem;"></i>
+                            <h6>Reporte Diario</h6>
+                            <p class="text-muted small mb-3">Actividad del día actual</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="generarReporte('diario')">
+                                <i class="fas fa-download me-1"></i>Descargar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-calendar-week text-success mb-2" style="font-size: 2rem;"></i>
+                            <h6>Reporte Semanal</h6>
+                            <p class="text-muted small mb-3">Resumen de la semana</p>
+                            <button class="btn btn-outline-success btn-sm" onclick="generarReporte('semanal')">
+                                <i class="fas fa-download me-1"></i>Descargar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-calendar text-warning mb-2" style="font-size: 2rem;"></i>
+                            <h6>Reporte Mensual</h6>
+                            <p class="text-muted small mb-3">Estadísticas del mes</p>
+                            <button class="btn btn-outline-warning btn-sm" onclick="generarReporte('mensual')">
+                                <i class="fas fa-download me-1"></i>Descargar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-chart-bar text-info mb-2" style="font-size: 2rem;"></i>
+                            <h6>Reporte Anual</h6>
+                            <p class="text-muted small mb-3">Análisis completo del año</p>
+                            <button class="btn btn-outline-info btn-sm" onclick="generarReporte('anual')">
+                                <i class="fas fa-download me-1"></i>Descargar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Gráfico de tendencia
+const tendenciaCtx = document.getElementById('tendenciaChart').getContext('2d');
+new Chart(tendenciaCtx, {
+    type: 'line',
+    data: {
+        labels: ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre'],
+        datasets: [{
+            label: 'Préstamos Solicitados',
+            data: [45, 52, 38, 61, 48, 55],
+            borderColor: '#E10026',
+            backgroundColor: 'rgba(225, 0, 38, 0.1)',
+            tension: 0.4
+        }, {
+            label: 'Préstamos Completados',
+            data: [42, 48, 35, 58, 45, 52],
+            borderColor: '#28A745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Gráfico de estados
+const estadoCtx = document.getElementById('estadoChart').getContext('2d');
+new Chart(estadoCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Completados', 'Activos', 'Pendientes', 'Vencidos'],
+        datasets: [{
+            data: [65, 15, 12, 8],
+            backgroundColor: [
+                '#28A745',
+                '#E10026',
+                '#FFC107',
+                '#DC3545'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    }
+});
+
+// Gráfico de categorías
+const categoriaCtx = document.getElementById('categoriaChart').getContext('2d');
+new Chart(categoriaCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Computadoras', 'Proyectores', 'Laboratorio', 'Audiovisual', 'Herramientas'],
+        datasets: [{
+            label: 'Cantidad de Préstamos',
+            data: [85, 42, 28, 35, 18],
+            backgroundColor: [
+                '#E10026',
+                '#FFC107',
+                '#28A745',
+                '#DC3545',
+                '#6C757D'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Gráfico de actividad semanal
+const semanaCtx = document.getElementById('semanaChart').getContext('2d');
+new Chart(semanaCtx, {
+    type: 'radar',
+    data: {
+        labels: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+        datasets: [{
+            label: 'Préstamos por Día',
+            data: [12, 15, 18, 16, 14, 8, 3],
+            borderColor: '#E10026',
+            backgroundColor: 'rgba(225, 0, 38, 0.2)',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    }
+});
+
+function exportarReporte(formato) {
+    // Simulación de descarga
+    alert(`Exportando reporte en formato ${formato.toUpperCase()}...`);
+}
+
+function generarReporte(periodo) {
+    // Simulación de generación de reporte
+    alert(`Generando reporte ${periodo}...`);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% set title = "Editar Equipo - Sistema de Préstamos" %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-edit text-primary me-3"></i>
+            Editar Equipo: {{ equipo.nombre }}
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Modifica la información del equipo
+        </p>
+    </div>
+    <div class="text-end">
+        <a href="{{ url_for('ver_equipo', equipo_id=equipo.id) }}" class="btn btn-outline-info me-2">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+        </a>
+        <a href="{{ url_for('listar_equipos') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-laptop text-primary me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Información del Equipo - {{ equipo.codigo }}</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" class="needs-validation" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <!-- Información Básica -->
+                        <div class="col-12 mb-4">
+                            <h6 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Información Básica
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.codigo.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-barcode"></i>
+                                </span>
+                                {{ form.codigo(class="form-control" + (" is-invalid" if form.codigo.errors else ""), placeholder="Ej: EQ-001", required=true) }}
+                            </div>
+                            {% if form.codigo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.codigo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <small><i class="fas fa-info-circle me-1"></i>Código único para identificar el equipo</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.nombre.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-laptop"></i>
+                                </span>
+                                {{ form.nombre(class="form-control" + (" is-invalid" if form.nombre.errors else ""), placeholder="Ej: Laptop HP Pavilion", required=true) }}
+                            </div>
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.nombre.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.categoria.label(class="form-label fw-bold") }}
+                            {{ form.categoria(class="form-select" + (" is-invalid" if form.categoria.errors else ""), required=true) }}
+                            {% if form.categoria.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.categoria.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.estado.label(class="form-label fw-bold") }}
+                            {{ form.estado(class="form-select" + (" is-invalid" if form.estado.errors else ""), required=true) }}
+                            {% if form.estado.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.estado.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Información Técnica -->
+                        <div class="col-12 mb-4 mt-4">
+                            <h6 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-microchip me-2"></i>Información Técnica
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.marca.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-tag"></i>
+                                </span>
+                                {{ form.marca(class="form-control" + (" is-invalid" if form.marca.errors else ""), placeholder="Ej: HP, Dell, Lenovo") }}
+                            </div>
+                            {% if form.marca.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.marca.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.modelo.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-cog"></i>
+                                </span>
+                                {{ form.modelo(class="form-control" + (" is-invalid" if form.modelo.errors else ""), placeholder="Ej: Pavilion 15") }}
+                            </div>
+                            {% if form.modelo.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.modelo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.numero_serie.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-hashtag"></i>
+                                </span>
+                                {{ form.numero_serie(class="form-control" + (" is-invalid" if form.numero_serie.errors else ""), placeholder="Ej: SN123456789") }}
+                            </div>
+                            {% if form.numero_serie.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numero_serie.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.fecha_adquisicion.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-calendar"></i>
+                                </span>
+                                {{ form.fecha_adquisicion(class="form-control" + (" is-invalid" if form.fecha_adquisicion.errors else ""), type="date") }}
+                            </div>
+                            {% if form.fecha_adquisicion.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.fecha_adquisicion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Descripción y Observaciones -->
+                        <div class="col-12 mb-4 mt-4">
+                            <h6 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-align-left me-2"></i>Descripción y Observaciones
+                            </h6>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            {{ form.descripcion.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-align-left"></i>
+                                </span>
+                                {{ form.descripcion(class="form-control" + (" is-invalid" if form.descripcion.errors else ""), rows="3", placeholder="Describe las características principales del equipo") }}
+                            </div>
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.descripcion.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12 mb-4">
+                            {{ form.observaciones.label(class="form-label fw-bold") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-sticky-note"></i>
+                                </span>
+                                {{ form.observaciones(class="form-control" + (" is-invalid" if form.observaciones.errors else ""), rows="3", placeholder="Observaciones adicionales, estado, accesorios incluidos, etc.") }}
+                            </div>
+                            {% if form.observaciones.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.observaciones.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Configuración -->
+                        <div class="col-12 mb-4 mt-4">
+                            <h6 class="text-primary fw-bold mb-3">
+                                <i class="fas fa-cog me-2"></i>Configuración
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form.disponible(class="form-check-input", id="disponible_check") }}
+                                <label class="form-check-label fw-bold" for="disponible_check">
+                                    <i class="fas fa-check-circle text-success me-2"></i>Disponible para préstamo
+                                </label>
+                                <div class="form-text">
+                                    <small>Si está marcado, el equipo estará disponible inmediatamente</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de Acción -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ url_for('ver_equipo', equipo_id=equipo.id) }}" class="btn btn-outline-info">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalles
+                                </a>
+                                <div>
+                                    <a href="{{ url_for('listar_equipos') }}" class="btn btn-outline-secondary me-2">
+                                        <i class="fas fa-times me-2"></i>Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Validación del formulario
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

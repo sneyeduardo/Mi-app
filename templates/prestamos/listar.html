@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Préstamos - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h2 mb-4">
+            <i class="fas fa-handshake"></i> Solicitar Préstamo de Equipos
+        </h1>
+    </div>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="fas fa-laptop text-iunp-primary" style="font-size: 2rem;"></i>
+                <h4>{{ equipos_totales }}</h4>
+                <p class="mb-0">Total Equipos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle text-iunp-success" style="font-size: 2rem;"></i>
+                <h4>{{ equipos_disponibles }}</h4>
+                <p class="mb-0">Disponibles</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="fas fa-exchange-alt text-iunp-warning" style="font-size: 2rem;"></i>
+                <h4>{{ equipos_prestados }}</h4>
+                <p class="mb-0">Prestados</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <i class="fas fa-tools text-iunp-danger" style="font-size: 2rem;"></i>
+                <h4>{{ equipos_mantenimiento }}</h4>
+                <p class="mb-0">Mantenimiento</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros de Búsqueda -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros de Búsqueda</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Búsqueda</label>
+                        <input type="text" class="form-control" name="busqueda" 
+                               value="{{ busqueda }}" placeholder="Buscar por nombre o descripción...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Categoría</label>
+                        <select class="form-select" name="categoria">
+                            <option value="">Todas las categorías</option>
+                            {% for categoria in categorias_disponibles %}
+                            <option value="{{ categoria.value }}" {% if categoria == categoria_filtro %}selected{% endif %}>{{ categoria.value.title() }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" name="estado">
+                            <option value="">Todos los estados</option>
+                            <option value="disponible" {% if estado_filtro == 'disponible' %}selected{% endif %}>Disponible</option>
+                            <option value="prestado" {% if estado_filtro == 'prestado' %}selected{% endif %}>Prestado</option>
+                            <option value="mantenimiento" {% if estado_filtro == 'mantenimiento' %}selected{% endif %}>En Mantenimiento</option>
+                            <option value="dañado" {% if estado_filtro == 'dañado' %}selected{% endif %}>Dañado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-iunp-primary w-100">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Equipos Disponibles para Préstamo -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Equipos para Préstamo ({{ equipos|length }})
+                    <span class="badge bg-success ms-2">✅ Corregido</span>
+                </h5>
+                {% if current_user.puede_aprobar_prestamos() %}
+                <a href="{{ url_for('crear_equipo') }}" class="btn btn-iunp-success">
+                    <i class="fas fa-plus-circle"></i> Agregar Equipo
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if equipos %}
+                    <div class="row">
+                        {% for equipo in equipos %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h6 class="card-title mb-0">
+                                            <i class="fas fa-laptop text-iunp-primary"></i>
+                                            {{ equipo.nombre }}
+                                        </h6>
+                                        {% if equipo.estado == 'disponible' %}
+                                            <span class="badge badge-iu-success">Disponible</span>
+                                        {% elif equipo.estado == 'prestado' %}
+                                            <span class="badge badge-iu-warning">Prestado</span>
+                                        {% elif equipo.estado == 'mantenimiento' %}
+                                            <span class="badge badge-iu-danger">Mantenimiento</span>
+                                        {% elif equipo.estado == 'dañado' %}
+                                            <span class="badge" style="background-color: #6c757d;">Dañado</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-tag"></i> {{ equipo.categoria.value.title() }}
+                                    </p>
+                                    
+                                    {% if equipo.marca %}
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-industry"></i> {{ equipo.marca }}{% if equipo.modelo %} - {{ equipo.modelo }}{% endif %}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-hashtag"></i> Código: {{ equipo.codigo }}
+                                    </p>
+                                    
+                                    {% if equipo.descripcion %}
+                                    <p class="card-text small text-muted mb-3">
+                                        {{ equipo.descripcion[:100] }}{% if equipo.descripcion|length > 100 %}...{% endif %}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('ver_equipo', equipo_id=equipo.id) }}" 
+                                           class="btn btn-iunp-outline-primary btn-sm flex-fill">
+                                            <i class="fas fa-eye"></i> Ver Detalles
+                                        </a>
+                                        
+                                        {% if equipo.esta_disponible() %}
+                                            {% if current_user.puede_aprobar_prestamos() %}
+                                                <a href="{{ url_for('solicitar_prestamo', equipo_id=equipo.id) }}" 
+                                                   class="btn btn-iunp-success btn-sm">
+                                                    <i class="fas fa-check-circle"></i> Aprobar
+                                                </a>
+                                            {% else %}
+                                                <a href="{{ url_for('solicitar_prestamo', equipo_id=equipo.id) }}" 
+                                                   class="btn btn-iunp-primary btn-sm">
+                                                    <i class="fas fa-hand-pointer"></i> Solicitar
+                                                </a>
+                                            {% endif %}
+                                        {% else %}
+                                            {% if equipo.tiene_prestamo_activo() %}
+                                                <button class="btn btn-secondary btn-sm" disabled>
+                                                    <i class="fas fa-clock"></i> Ocupado
+                                                </button>
+                                            {% else %}
+                                                <button class="btn btn-secondary btn-sm" disabled>
+                                                    <i class="fas fa-times-circle"></i> No Disponible
+                                                </button>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="card-footer text-muted small">
+                                    <div class="d-flex justify-content-between">
+                                        <span>
+                                            <i class="fas fa-calendar"></i>
+                                            Adquirido: {{ equipo.fecha_adquisicion.strftime('%d/%m/%Y') if equipo.fecha_adquisicion else 'N/A' }}
+                                        </span>
+                                        {% if equipo.numero_serie %}
+                                        <span>
+                                            <i class="fas fa-barcode"></i> {{ equipo.numero_serie }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="text-muted mt-3">No se encontraron equipos</h4>
+                        <p class="text-muted">
+                            {% if busqueda or categoria_filtro or estado_filtro %}
+                                Intenta modificar los filtros de búsqueda.
+                            {% else %}
+                                Aún no hay equipos registrados en el sistema.
+                            {% endif %}
+                        </p>
+                        {% if current_user.puede_aprobar_prestamos() and not (busqueda or categoria_filtro or estado_filtro) %}
+                        <a href="{{ url_for('crear_equipo') }}" class="btn btn-iunp-success mt-2">
+                            <i class="fas fa-plus-circle"></i> Agregar Primer Equipo
+                        </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial de Préstamos del Usuario -->
+{% if prestamos_usuario %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history"></i> Mis Préstamos Activos ({{ prestamos_usuario|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Fecha Préstamo</th>
+                                <th>Fecha Devolución</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prestamo in prestamos_usuario %}
+                            <tr>
+                                <td>
+                                    <strong>{{ prestamo.equipo.nombre }}</strong><br>
+                                    <small class="text-muted">{{ prestamo.equipo.codigo }}</small>
+                                </td>
+                                <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') if prestamo.fecha_prestamo else 'N/A' }}</td>
+                                <td>{{ prestamo.fecha_devolucion.strftime('%d/%m/%Y') if prestamo.fecha_devolucion else 'N/A' }}</td>
+                                <td>
+                                    {% if prestamo.estado.value == 'solicitado' %}
+                                        <span class="badge badge-iu-info">Solicitado</span>
+                                    {% elif prestamo.estado.value == 'aprobado' %}
+                                        <span class="badge badge-iu-success">Aprobado</span>
+                                    {% elif prestamo.estado.value == 'rechazado' %}
+                                        <span class="badge badge-iu-danger">Rechazado</span>
+                                    {% elif prestamo.estado.value == 'devuelto' %}
+                                        <span class="badge" style="background-color: #6c757d;">Devuelto</span>
+                                    {% elif prestamo.estado.value == 'vencido' %}
+                                        <span class="badge badge-iu-warning">Vencido</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('ver_prestamo', prestamo_id=prestamo.id) }}" 
+                                       class="btn btn-iunp-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-submit del formulario cuando cambian los filtros
+document.addEventListener('DOMContentLoaded', function() {
+    const selectores = document.querySelectorAll('select[name="categoria"], select[name="estado"]');
+    selectores.forEach(selector => {
+        selector.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+    
+    // Enter en el campo de búsqueda
+    const busquedaInput = document.querySelector('input[name="busqueda"]');
+    if (busquedaInput) {
+        busquedaInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                this.form.submit();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

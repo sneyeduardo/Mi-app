@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Préstamos - Sistema de Préstamos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="h2 mb-4">
+            <i class="fas fa-exchange-alt"></i> 
+            {% if current_user.is_admin() %}Gestión de Préstamos{% else %}Mis Préstamos{% endif %}
+        </h1>
+    </div>
+</div>
+
+<!-- Préstamos Activos -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-hourglass-half"></i> Préstamos Activos ({{ prestamos_activos|length }})
+                </h5>
+                {% if current_user.is_admin() %}
+                <a href="{{ url_for('prestamo_directo') }}" class="btn btn-iunp-warning">
+                    <i class="fas fa-plus-circle"></i> Nuevo Préstamo
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if prestamos_activos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    {% if current_user.is_admin() %}<th>Usuario</th>{% endif %}
+                                    <th>Equipo</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha Préstamo</th>
+                                    <th>Días Transcurridos</th>
+                                    <th>Observaciones</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prestamo in prestamos_activos %}
+                                <tr>
+                                    {% if current_user.is_admin() %}
+                                    <td>
+                                        <strong>{{ prestamo.usuario.nombre if prestamo.usuario else 'Usuario eliminado' }}</strong>
+                                        {% if prestamo.usuario and prestamo.usuario.email %}
+                                            <br><small class="text-muted">{{ prestamo.usuario.email }}</small>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                    <td>
+                                        <strong>{{ prestamo.equipo.nombre if prestamo.equipo else 'Equipo eliminado' }}</strong>
+                                        {% if prestamo.equipo %}
+                                            <br><small class="text-muted">ID: {{ prestamo.equipo.id }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prestamo.equipo %}
+                                            <span class="badge badge-iu-secondary">{{ prestamo.equipo.tipo }}</span>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y %H:%M') if prestamo.fecha_prestamo else 'N/A' }}</td>
+                                    <td>
+                                        {% if prestamo.fecha_prestamo %}
+                                            {% set dias = (moment().date() - prestamo.fecha_prestamo.date()).days %}
+                                            <span class="badge 
+                                                {% if dias <= 7 %}badge-iu-success
+                                                {% elif dias <= 14 %}badge-iu-warning
+                                                {% else %}badge-iu-danger{% endif %}">
+                                                {{ (moment().date() - prestamo.fecha_prestamo.date()).days }} días
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prestamo.observaciones %}
+                                            <small class="text-muted" title="{{ prestamo.observaciones }}">
+                                                {{ prestamo.observaciones[:30] }}{% if prestamo.observaciones|length > 30 %}...{% endif %}
+                                            </small>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('devolver_prestamo', prestamo_id=prestamo.id) }}" 
+                                           class="btn btn-iunp-warning btn-sm">
+                                            <i class="fas fa-arrow-left"></i> Devolver
+                                        </a>
+                                        {% if prestamo.equipo %}
+                                        <a href="{{ url_for('detalle_equipo', equipo_id=prestamo.equipo.id) }}" 
+                                           class="btn btn-iunp-outline-info btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="text-muted mt-3">No hay préstamos activos</h4>
+                        <p class="text-muted">
+                            {% if current_user.is_admin() %}
+                                Todos los equipos están disponibles o en mantenimiento.
+                            {% else %}
+                                No tienes equipos prestados actualmente.
+                            {% endif %}
+                        </p>
+                        {% if not current_user.is_admin() %}
+                        <a href="{{ url_for('equipos') }}" class="btn btn-iunp-primary">
+                            <i class="fas fa-search"></i> Buscar Equipos
+                        </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial de Préstamos -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history"></i> Historial de Préstamos
+                    {% if current_user.is_admin() %}
+                        (Recientes - {{ prestamos_devueltos|length }})
+                    {% else %}
+                        ({{ prestamos_devueltos|length }})
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if prestamos_devueltos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    {% if current_user.is_admin() %}<th>Usuario</th>{% endif %}
+                                    <th>Equipo</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha Préstamo</th>
+                                    <th>Fecha Devolución</th>
+                                    <th>Duración</th>
+                                    <th>Observaciones</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prestamo in prestamos_devueltos %}
+                                <tr>
+                                    {% if current_user.is_admin() %}
+                                    <td>
+                                        <strong>{{ prestamo.usuario.nombre if prestamo.usuario else 'Usuario eliminado' }}</strong>
+                                    </td>
+                                    {% endif %}
+                                    <td>
+                                        <strong>{{ prestamo.equipo.nombre if prestamo.equipo else 'Equipo eliminado' }}</strong>
+                                        {% if prestamo.equipo %}
+                                            <br><small class="text-muted">ID: {{ prestamo.equipo.id }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prestamo.equipo %}
+                                            <span class="badge badge-iu-secondary">{{ prestamo.equipo.tipo }}</span>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prestamo.fecha_prestamo.strftime('%d/%m/%Y') if prestamo.fecha_prestamo else 'N/A' }}</td>
+                                    <td>{{ prestamo.fecha_devolucion.strftime('%d/%m/%Y') if prestamo.fecha_devolucion else 'N/A' }}</td>
+                                    <td>
+                                        {% if prestamo.fecha_prestamo and prestamo.fecha_devolucion %}
+                                            {% set duracion = (prestamo.fecha_devolucion.date() - prestamo.fecha_prestamo.date()).days %}
+                                            {{ duracion }} día{% if duracion != 1 %}s{% endif %}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prestamo.observaciones %}
+                                            <small class="text-muted" title="{{ prestamo.observaciones }}">
+                                                {{ prestamo.observaciones[:30] }}{% if prestamo.observaciones|length > 30 %}...{% endif %}
+                                            </small>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-iu-success">Devuelto</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-2 mb-0">
+                            {% if current_user.is_admin() %}
+                                No hay historial de préstamos devueltos.
+                            {% else %}
+                                No tienes historial de préstamos.
+                            {% endif %}
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Actualizar automáticamente los días transcurridos
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para calcular y actualizar días
+    function actualizarDias() {
+        const badges = document.querySelectorAll('.badge');
+        badges.forEach(badge => {
+            if (badge.textContent.includes('días')) {
+                // Lógica para actualizar si es necesario
+                // (opcional, para actualizaciones en tiempo real)
+            }
+        });
+    }
+    
+    // Confirmar devoluciones
+    const botonesDevolver = document.querySelectorAll('a[href*="devolver"]');
+    botonesDevolver.forEach(boton => {
+        boton.addEventListener('click', function(e) {
+            if (!confirm('¿Estás seguro de proceder con la devolución de este equipo?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

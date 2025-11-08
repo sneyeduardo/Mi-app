@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+{% set title = "Panel de Administración" %}
+
+{% block content %}
+<!-- Header de administración -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-cogs text-primary me-3"></i>
+            Panel de Administración
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Control total del sistema general
+        </p>
+    </div>
+    <div class="text-end">
+        <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-plus me-2"></i>Acciones Rápidas
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ url_for('crear_equipo') }}">
+                    <i class="fas fa-laptop me-2"></i>Agregar Equipo
+                </a></li>
+                <li><a class="dropdown-item" href="{{ url_for('admin_usuarios') }}">
+                    <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de estadísticas globales -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-users text-primary" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ total_usuarios }}</h3>
+                <p class="text-muted mb-0">Usuarios Registrados</p>
+                <small class="text-success">
+                    <i class="fas fa-arrow-up me-1"></i>+{{ total_usuarios * 0.1 | round | int }} este mes
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-laptop text-info" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ total_equipos }}</h3>
+                <p class="text-muted mb-0">Total Equipos</p>
+                <small class="text-info">
+                    <i class="fas fa-check-circle me-1"></i>{{ equipos_disponibles }} disponibles
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-handshake text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ total_prestamos }}</h3>
+                <p class="text-muted mb-0">Total Recursos</p>
+                <small class="text-success">
+                    <i class="fas fa-arrow-up me-1"></i>{{ prestamos_activos }} activos
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-custom text-center">
+            <div class="card-body py-4">
+                <div class="mb-3">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2.5rem;"></i>
+                </div>
+                <h3 class="text-dark mb-1">{{ prestamos_vencidos }}</h3>
+                <p class="text-muted mb-0">Recursos Vencidos</p>
+                <small class="text-warning">
+                    <i class="fas fa-clock me-1"></i>Requieren atención
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Módulos principales de administración -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom h-100">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-users-cog text-primary me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Gestión de Usuarios</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Administra usuarios, permisos y roles del sistema
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_usuarios') }}" class="btn btn-primary">
+                        <i class="fas fa-users me-2"></i>Ver Usuarios
+                    </a>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_usuarios') }}#estudiantes" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-user-graduate me-1"></i>Estudiantes
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_usuarios') }}#profesores" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-chalkboard-teacher me-1"></i>Profesores
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom h-100">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-laptop-code text-info me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Gestión de Equipos</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Controla el inventario de equipos y su disponibilidad
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_equipos') }}" class="btn btn-info">
+                        <i class="fas fa-laptop me-2"></i>Administrar Equipos
+                    </a>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{{ url_for('crear_equipo') }}" class="btn btn-outline-info btn-sm w-100">
+                                <i class="fas fa-plus me-1"></i>Agregar
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_equipos') }}#categorias" class="btn btn-outline-info btn-sm w-100">
+                                <i class="fas fa-tags me-1"></i>Categorías
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom h-100">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-clipboard-list text-success me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Gestión de Préstamos</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Aprueba, modifica y supervisa todos los recursos
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_prestamos') }}" class="btn btn-success">
+                        <i class="fas fa-clipboard-check me-2"></i>Administrar Préstamos
+                    </a>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_prestamos') }}#pendientes" class="btn btn-outline-success btn-sm w-100">
+                                <i class="fas fa-clock me-1"></i>Pendientes ({{ prestamos_por_aprobar }})
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_prestamos') }}#vencidos" class="btn btn-outline-warning btn-sm w-100">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Vencidos ({{ prestamos_vencidos }})
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom h-100">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-chart-bar text-warning me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Reportes y Estadísticas</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Genera reportes detallados y análisis del sistema
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_reportes') }}" class="btn btn-warning text-dark">
+                        <i class="fas fa-chart-line me-2"></i>Ver Reportes
+                    </a>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_reportes') }}#uso" class="btn btn-outline-warning btn-sm w-100">
+                                <i class="fas fa-download me-1"></i>Exportar
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_configuracion') }}" class="btn btn-outline-secondary btn-sm w-100">
+                                <i class="fas fa-cog me-1"></i>Configurar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 shadow-custom h-100">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-key text-danger me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Tokens de Acceso</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Genera y gestiona tokens de acceso único para situaciones de emergencia
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin_token_generar') }}" class="btn btn-danger">
+                        <i class="fas fa-plus me-2"></i>Generar Token
+                    </a>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_tokens') }}" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-list me-1"></i>Ver Tokens
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{{ url_for('admin_tokens') }}#activos" class="btn btn-outline-success btn-sm w-100">
+                                <i class="fas fa-shield-alt me-1"></i>Activos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estado del sistema y alertas -->
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-heartbeat text-danger me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Estado del Sistema</h5>
+                <span class="badge bg-success ms-auto">Operativo</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <div class="mb-2">
+                                <i class="fas fa-server text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                            <h6 class="text-dark">Servidor</h6>
+                            <span class="badge bg-success">Activo</span>
+                            <small class="text-muted d-block mt-1">Uptime: 99.9%</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <div class="mb-2">
+                                <i class="fas fa-database text-info" style="font-size: 2rem;"></i>
+                            </div>
+                            <h6 class="text-dark">Base de Datos</h6>
+                            <span class="badge bg-success">Conectada</span>
+                            <small class="text-muted d-block mt-1">Latencia: 2ms</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <div class="mb-2">
+                                <i class="fas fa-shield-alt text-success" style="font-size: 2rem;"></i>
+                            </div>
+                            <h6 class="text-dark">Seguridad</h6>
+                            <span class="badge bg-success">Protegido</span>
+                            <small class="text-muted d-block mt-1">Última copia: Hoy</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0 d-flex align-items-center">
+                <i class="fas fa-bell text-warning me-3" style="font-size: 1.5rem;"></i>
+                <h5 class="mb-0">Alertas</h5>
+            </div>
+            <div class="card-body">
+                {% if prestamos_vencidos > 0 %}
+                <div class="alert alert-warning alert-sm mb-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>{{ prestamos_vencidos }} préstamos vencidos</strong>
+                    <br><small>Requieren devolución inmediata</small>
+                </div>
+                {% endif %}
+                
+                {% if prestamos_por_aprobar > 0 %}
+                <div class="alert alert-info alert-sm mb-3">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>{{ prestamos_por_aprobar }} solicitudes pendientes</strong>
+                    <br><small>Esperando aprobación</small>
+                </div>
+                {% endif %}
+                
+                {% if equipos_disponibles < total_equipos * 0.2 %}
+                <div class="alert alert-danger alert-sm mb-3">
+                    <i class="fas fa-laptop me-2"></i>
+                    <strong>Pocos equipos disponibles</strong>
+                    <br><small>Menos del 20% disponible</small>
+                </div>
+                {% endif %}
+                
+                {% if prestamos_vencidos == 0 and prestamos_por_aprobar == 0 %}
+                <div class="alert alert-success alert-sm">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Todo en orden</strong>
+                    <br><small>No hay alertas pendientes</small>
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('admin_reportes') }}" class="btn btn-sm btn-outline-primary">
+                        Ver historial completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.alert-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+{% set title = "Configuración del Sistema" %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 d-flex align-items-center">
+            <i class="fas fa-cogs text-secondary me-3"></i>
+            Configuración del Sistema
+        </h1>
+        <p class="text-muted mb-0 mt-2">
+            Administra configuraciones generales y parámetros del sistema
+        </p>
+    </div>
+    <div class="text-end">
+        <button type="button" class="btn btn-secondary" onclick="guardarConfiguracion()">
+            <i class="fas fa-save me-2"></i>Guardar Cambios
+        </button>
+    </div>
+</div>
+
+<!-- Configuraciones principales -->
+<div class="row mb-4">
+    <div class="col-lg-8 mb-4">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-sliders-h text-primary me-2"></i>
+                    Configuraciones Generales
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="configForm">
+                    <!-- Configuraciones de préstamos -->
+                    <div class="mb-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-handshake me-2"></i>Configuraciones de Préstamos
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Duración máxima de préstamo (días)</label>
+                                <input type="number" class="form-control" value="30" min="1" max="365">
+                                <small class="text-muted">Máximo tiempo que puede durar un préstamo</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Días de gracia para devolución</label>
+                                <input type="number" class="form-control" value="2" min="0" max="30">
+                                <small class="text-muted">Días adicionales antes de marcar como vencido</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tiempo mínimo entre préstamos (horas)</label>
+                                <input type="number" class="form-control" value="24" min="1" max="168">
+                                <small class="text-muted">Tiempo mínimo para solicitar otro equipo</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Máximo préstamos simultáneos por usuario</label>
+                                <input type="number" class="form-control" value="3" min="1" max="10">
+                                <small class="text-muted">Límite de equipos que puede tener en préstamo</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configuraciones de notificaciones -->
+                    <div class="mb-4">
+                        <h6 class="text-success mb-3">
+                            <i class="fas fa-bell me-2"></i>Notificaciones
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="notifVencimientos" checked>
+                                    <label class="form-check-label" for="notifVencimientos">
+                                        Notificar préstamos próximos a vencer
+                                    </label>
+                                </div>
+                                <small class="text-muted">Días antes del vencimiento: 
+                                    <input type="number" class="form-control form-control-sm d-inline-block" style="width: 80px;" value="3" min="1" max="30">
+                                </small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="notifAprobacion" checked>
+                                    <label class="form-check-label" for="notifAprobacion">
+                                        Notificar aprobación/rechazo de solicitudes
+                                    </label>
+                                </div>
+                                <small class="text-muted">Enviar notificación cuando se procese una solicitud</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="notifDisponibilidad">
+                                    <label class="form-check-label" for="notifDisponibilidad">
+                                        Notificar disponibilidad de equipos
+                                    </label>
+                                </div>
+                                <small class="text-muted">Avisar cuando equipos solicitados estén disponibles</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="notifAdmin" checked>
+                                    <label class="form-check-label" for="notifAdmin">
+                                        Alertas automáticas para administradores
+                                    </label>
+                                </div>
+                                <small class="text-muted">Préstamos vencidos, equipos sin mantenimiento, etc.</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configuraciones de seguridad -->
+                    <div class="mb-4">
+                        <h6 class="text-danger mb-3">
+                            <i class="fas fa-shield-alt me-2"></i>Seguridad
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Sesión expira en (minutos)</label>
+                                <input type="number" class="form-control" value="480" min="15" max="1440">
+                                <small class="text-muted">Tiempo de inactividad para cerrar sesión automáticamente</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Intentos máximos de login</label>
+                                <input type="number" class="form-control" value="5" min="3" max="10">
+                                <small class="text-muted">Bloquear usuario tras este número de intentos fallidos</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="requerirCambioPassword" checked>
+                                    <label class="form-check-label" for="requerirCambioPassword">
+                                        Requerir cambio de contraseña en primer login
+                                    </label>
+                                </div>
+                                <small class="text-muted">Forzar cambio de contraseña para usuarios nuevos</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="auditoriaCompleta" checked>
+                                    <label class="form-check-label" for="auditoriaCompleta">
+                                        Registrar todas las acciones
+                                    </label>
+                                </div>
+                                <small class="text-muted">Mantener log detallado de todas las operaciones</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Configuraciones de mantenimiento -->
+                    <div class="mb-4">
+                        <h6 class="text-warning mb-3">
+                            <i class="fas fa-wrench me-2"></i>Mantenimiento del Sistema
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Frecuencia de limpieza de logs (días)</label>
+                                <input type="number" class="form-control" value="90" min="30" max="365">
+                                <small class="text-muted">Eliminar logs antiguos automáticamente</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Backup automático cada (horas)</label>
+                                <select class="form-select">
+                                    <option value="24">24 horas (diario)</option>
+                                    <option value="12">12 horas</option>
+                                    <option value="6">6 horas</option>
+                                    <option value="1">1 hora</option>
+                                </select>
+                                <small class="text-muted">Frecuencia de respaldos automáticos</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="modoMantenimiento">
+                                    <label class="form-check-label" for="modoMantenimiento">
+                                        Modo de mantenimiento
+                                    </label>
+                                </div>
+                                <small class="text-muted">Desactivar acceso de usuarios durante mantenimiento</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="verificacionEstado" checked>
+                                    <label class="form-check-label" for="verificacionEstado">
+                                        Verificación automática de estado
+                                    </label>
+                                </div>
+                                <small class="text-muted">Comprobar estado de equipos diariamente</small>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Panel lateral de información -->
+    <div class="col-lg-4 mb-4">
+        <!-- Estado del sistema -->
+        <div class="card border-0 shadow-custom mb-4">
+            <div class="card-header border-0">
+                <h6 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-heartbeat text-success me-2"></i>
+                    Estado del Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Servidor</span>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Base de Datos</span>
+                        <span class="badge bg-success">Conectada</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Último Backup</span>
+                        <small class="text-muted">Hoy 03:00 AM</small>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Espacio en Disco</span>
+                        <small class="text-muted">68% usado</small>
+                    </div>
+                    <div class="progress mt-1" style="height: 6px;">
+                        <div class="progress-bar bg-warning" style="width: 68%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Acciones rápidas -->
+        <div class="card border-0 shadow-custom mb-4">
+            <div class="card-header border-0">
+                <h6 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-bolt text-warning me-2"></i>
+                    Acciones Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="realizarBackup()">
+                        <i class="fas fa-download me-2"></i>Crear Backup Ahora
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="limpiarCache()">
+                        <i class="fas fa-broom me-2"></i>Limpiar Cache
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="verificarIntegridad()">
+                        <i class="fas fa-check-circle me-2"></i>Verificar Integridad
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="reiniciarSistema()">
+                        <i class="fas fa-redo me-2"></i>Reiniciar Servicios
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información del sistema -->
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0">
+                <h6 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-info-circle text-info me-2"></i>
+                    Información del Sistema
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Versión:</small>
+                    <div><strong>v2.1.0</strong></div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Última actualización:</small>
+                    <div><strong>15/10/2025</strong></div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Entorno:</small>
+                    <div><strong>Producción</strong></div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Base de datos:</small>
+                    <div><strong>SQLite 3.40</strong></div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Desarrollado por:</small>
+                    <div><strong>Sney Perez</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial de cambios -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-custom">
+            <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-history text-info me-2"></i>
+                    Historial de Cambios
+                </h5>
+                <small class="text-muted">Últimos 10 cambios de configuración</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Usuario</th>
+                                <th>Acción</th>
+                                <th>Detalles</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><small>15/10/2025 14:30</small></td>
+                                <td>Admin Sistema</td>
+                                <td>Cambio de configuración</td>
+                                <td>Duración máxima préstamo: 30 días</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>14/10/2025 09:15</small></td>
+                                <td>Admin Sistema</td>
+                                <td>Backup manual</td>
+                                <td>Creación de respaldo manual</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>13/10/2025 16:45</small></td>
+                                <td>Admin Sistema</td>
+                                <td>Limpieza de logs</td>
+                                <td>Eliminados logs anteriores a 90 días</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                            <tr>
+                                <td><small>12/10/2025 11:20</small></td>
+                                <td>Admin Sistema</td>
+                                <td>Actualización de sistema</td>
+                                <td>Versión 2.1.0 instalada</td>
+                                <td><span class="badge bg-success">Completado</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function guardarConfiguracion() {
+    // Simulación de guardado
+    const form = document.getElementById('configForm');
+    const formData = new FormData(form);
+    
+    // Mostrar loading
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+    btn.disabled = true;
+    
+    // Simular guardado
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Configuración guardada exitosamente');
+    }, 2000);
+}
+
+function realizarBackup() {
+    if (confirm('¿Desea crear un backup completo del sistema?')) {
+        alert('Backup iniciado. Este proceso puede tomar varios minutos.');
+    }
+}
+
+function limpiarCache() {
+    if (confirm('¿Desea limpiar el cache del sistema?')) {
+        alert('Cache limpiado exitosamente');
+    }
+}
+
+function verificarIntegridad() {
+    alert('Verificando integridad del sistema...');
+    setTimeout(() => {
+        alert('Verificación completada. Sistema OK.');
+    }, 3000);
+}
+
+function reiniciarServicios() {
+    if (confirm('¿Desea reiniciar todos los servicios del sistema?')) {
+        alert('Reiniciando servicios...');
+        setTimeout(() => {
+            alert('Servicios reiniciados exitosamente');
+        }, 5000);
+    }
+}
+</script>
+{% endblock %}
